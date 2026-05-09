@@ -1,0 +1,18 @@
+{
+  "labels": [
+    "left_mirror",
+    "left",
+    "front",
+    "center_mirror",
+    "front_right",
+    "right_mirror",
+    "right",
+    "infotainment",
+    "steering_wheel"
+  ],
+  "feature_dim": 20,
+  "per_frame_dim": 20,
+  "temporal_window": 1,
+  "input": "features  (B, 20)  float32",
+  "output": "logits    (B, 9)   float32  (argmax -> labels[i])"
+}

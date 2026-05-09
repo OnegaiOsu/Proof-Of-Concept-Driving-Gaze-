@@ -1,0 +1,16 @@
+# VisDrive gaze pipeline - laptop training environment.
+# Pi 5 deployment image needs only opencv, mediapipe, numpy, onnxruntime.
+
+mediapipe==0.10.32
+opencv-python==4.13.0.92
+numpy>=2.0,<3
+pandas>=2.2
+scikit-learn>=1.5
+tqdm>=4.66
+onnx>=1.16
+onnxruntime>=1.18
+
+# PyTorch must be installed separately to pick the correct CUDA wheels:
+#   pip install --index-url https://download.pytorch.org/whl/cu128 torch torchvision torchaudio
+# CPU-only:
+#   pip install torch torchvision torchaudio

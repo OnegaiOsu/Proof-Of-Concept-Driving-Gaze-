@@ -1,0 +1,517 @@
+
+
+
+
+
+
+
+
+
+
+VISDRIVE: 
+
+DRIVER ATTENTION MONITORING USING FACIAL
+
+LANDMARKS ON EMBEDDED SYSTEMS
+
+
+
+
+Submitted in Partial Fulfillment
+
+Of the Requirement for the Degree
+
+Bachelor of Science in Computer Science with Intelligence Systems Track.
+
+
+
+
+
+
+Dalistan, Rona Margaret A.
+
+Abel, Mao Zeth A.
+
+Astrero, Jannbeau Rain Amadeus B.
+
+
+
+
+Kamantigue, Sheryl D.
+
+
+
+
+
+
+
+
+
+May 2026
+
+Table of Contents
+
+List of Figures	2
+List of Tables	3
+CHAPTER I	4
+INTRODUCTION	4
+1.1 Project Context	4
+1.2 Purpose and Description	6
+1.3 Statement of the Problem	7
+1.4 Hypothesis	8
+1.5 Research Objectives	9
+1.6 Significance of the Study	10
+1.7 Scope and Limitations	11
+CHAPTER II	14
+REVIEW OF RELATED LITERATURE	14
+2.1 Foreign Literature and Studies	14
+2.2 Local Literature and Studies	18
+2.3 Synthesis	22
+CHAPTER III	23
+RESEARCH METHODOLOGY	23
+3.1 Software Development Methodology	24
+3.1.1 Prototyping Model	24
+3.3 Algorithms	29
+3.3.1. Hybrid Perception Pipeline	30
+3.4 Operational Framework	36
+3.5 Use Case / Flowchart / State Diagram	38
+3.5.1. Use Case	38
+3.5.2. Flowchart	40
+3.5.3 State Diagram	42
+3.6 Respondents of the Study	44
+3.6.1 Probability Sampling: Stratified Random Sampling	45
+3.6.2 Population and Strata	45
+3.6.3 Data Collection Instruments	46
+3.6.4 Data Analysis Methods	46
+REFERENCES	50
+
+
+
+
+List of Figures
+FigureTitlePageNo.1Figure of Prototyping Model252Conceptual Framework Diagram283VisDrive Hybrid Pipeline Diagram304Operational Framework Diagram355Use Case Diagram386Flowchart Diagram407State Diagram42
+List of Tables
+Table No.TitlePage1Distribution of Research Respondents45
+
+CHAPTER I
+
+INTRODUCTION
+	This chapter provides the foundational context for VisDrive, an embedded driver monitoring system born out of a critical public safety need. It explores the human toll of driver fatigue, the growing technological divide in automotive safety, and the overarching mission to democratize life-saving interventions for the everyday transport sector. Furthermore, this section outlines the specific problems the study aims to address, the objectives set by the researchers, and the scope within which the system will be developed.
+1.1 Project Context
+	The global transportation network is sustained by the grueling labor of professional drivers, but this relentless pace has birthed a severe occupational and public safety crisis: driver fatigue and distraction. Drowsiness is widely recognized as a critical issue that impairs attentional control, decision-making ability, and reaction time, drastically increasing the risk and severity of road crashes (Fonseca & Ferreira, 2025). The human toll is staggering; global statistics from the AAA Foundation for Traffic Safety (2023) indicate that approximately 21% of fatal road accidents are linked to driver fatigue. To put this invisible threat into perspective, being awake for 18 to 24 hours results in a cognitive impairment comparable to a Blood Alcohol Concentration (BAC) of 0.05% to 0.10%, drastically reducing reaction times (CDC, 2024).
+	This risk is exponentially magnified for professional drivers in the commercial freight and public transportation sectors. Because these drivers are frequently subjected to intense workloads, irregular shift scheduling, and long hours, they inevitably face chronic fatigue and physical exhaustion (Peters et al., 2021). This exhaustion functions as a primary mediator that translates high occupational stress directly into severe accident risks (Akkarasrisawad & Vanichkobchinda, 2025). Consequently, commercial and public utility drivers operating under these demanding conditions remain highly susceptible to drowsy driving, a leading cause of traffic crashes worldwide (Gao et al., 2024).
+	To mitigate these systemic occupational hazards, the automotive industry and researchers have shifted towards advanced, real-time driver monitoring systems, moving away from traditional self-reported or vehicle-based metrics that lack the sensitivity for early warning (Fonseca & Ferreira, 2025). Modern solutions increasingly focus on non-intrusive computer vision and machine learning techniques to analyze a driver’s facial behavior directly (Bhasker et al., 2025). These systems monitor critical behavioral metrics, such as prolonged eyelid closure and yawning frequency, and estimate gaze direction to determine if a driver is distracted or failing to focus on the road (Bhasker et al., 2025; Pawar et al., 2025; Gao et al., 2024).
+	However, a stark technological and economic divide exists. While advanced driver-assistance systems (ADAS) are becoming standard in modern luxury vehicles, there is a significant gap in their accessibility for the average public transport operator, especially in developing regions. Many existing solutions are prohibitively expensive, require high-end proprietary hardware, or are overly intrusive, demanding wearable sensors that are impractical for daily use. Furthermore, systems relying on cloud computing are often rendered useless in areas with inconsistent mobile internet coverage. The drivers who work the longest hours and carry the most passengers are often the ones left unprotected.
+	This creates an urgent need for an efficient, localized, and low-cost intervention that can be retrofitted into existing fleets. This research aims to address this critical gap by developing VisDrive, a computer vision-based monitoring system optimized for embedded edge devices. By democratizing lightweight facial landmark detection, VisDrive operates independently without the need for constant cloud connectivity or high-power computing. The system acts as a localized, vigilant safeguard, providing immediate audible feedback to drivers the moment signs of fatigue or visual distraction are detected. Ultimately, VisDrive seeks to foster a safer driving environment, protecting the livelihoods of overworked drivers and the lives of the millions of commuters who rely on them.
+1.2 Purpose and Description
+	Every day, millions of commuters and tons of essential freight are entrusted to drivers navigating exhausting, repetitive routes, often in older vehicles entirely devoid of modern safety nets. In the quiet, isolated hours of a long haul or the monotonous, draining crawl of daily traffic, a driver’s only defense against creeping fatigue is their own fading willpower. 	When an overworked public utility driver or commercial trucker is alone in the cabin, a single micro-sleep or momentary distraction can be fatal. The primary purpose of VisDrive is to intervene in this exact vulnerability. It is designed to act as an artificial co-pilot for the everyday transport sector, a localized safeguard that standardizes road safety by bringing high-end, life-saving intervention to the vehicles and drivers that need it most.
+	Rather than relying on a complex array of intrusive sensors or expensive infrastructure, VisDrive is conceptualized as a silent, intelligent observer. Housed in a compact, dashcam-sized unit, the system continuously reads the subtle human cues that precede a disaster: the prolonged blink, the drooping eyelids, or a gaze that drifts away from the road for just a second too long.
+	Crucially, the system is designed around the harsh realities of local driving environments. Because professional drivers frequently traverse provincial routes, rural highways, or infrastructure "dead zones" with highly unreliable internet, VisDrive operates entirely independent of the cloud. It processes every behavioral cue and micro-movement directly within the vehicle itself. This localized, edge-computing approach ensures that the moment a driver slips into a dangerous state of inattention, the system does not waste precious time communicating with a remote server. Instead, it instantly triggers a sharp, distinct audible warning, delivering a critical intervention in mere milliseconds to snap the driver’s attention back to the road.
+	Ultimately, VisDrive is more than just a combination of cameras and algorithms; it is a proactive shield built for the real-world conditions of commercial and public operators. By offering a low-cost, highly responsive, and privacy-respecting alternative to proprietary automotive technologies, VisDrive seeks to prevent the devastating ripple effects of traffic collisions, ensuring that overworked drivers can safely finish their routes and return home to their families.
+1.3 Statement of the Problem
+	At the heart of this research is a critical safety and economic deadlock: while driver fatigue and visual distraction continue to be leading catalysts for fatal road accidents, the technology capable of preventing these tragedies remains structurally and financially out of reach for the everyday transport sector. Therefore, the central problem this study seeks to solve is how to engineer an accessible, accurate, and localized driver monitoring.
+	Specifically, this study attempts to answer the following research questions:
+1. How can a computer vision model be optimized for an embedded system to achieve 90% accuracy in detecting driver distraction and fatigue?
+2. What is the optimal temporal threshold between the deep learning model detecting an impaired state (e.g., Yawning, Eyes Off-Road) and the execution of the hardware alert to minimize false positives while maintaining safety? 
+3. How does the system’s performance (accuracy and latency) degrade in varied lighting conditions, such as bright daylight versus overcast scenarios?
+4. How reliably can the VisDrive system maintain its targeted 1.5 to 2.0-second temporal threshold for issuing hardware alerts during continuous monitoring without performance degradation?
+5. What is the level of user acceptability and usability of an audible alert system for professional drivers according to ISO 25010 standards?
+1.4 Hypothesis
+	This study aims to prove the viability of deploying complex sequential neural networks on resource-constrained edge devices. The evaluation of the VisDrive system is guided by the following specific hypotheses:
+Hypothesis 1: On Detection Accuracy and Robustness
+* Null Hypothesis (H?): The edge-deployed DMD model will not achieve a statistically significant detection accuracy of 90% or higher in classifying driver fatigue and visual distraction across varied cabin lighting conditions.
+* Alternative Hypothesis (H?): The edge-deployed DMD model will achieve a minimum detection accuracy of 90% in classifying driver fatigue and visual distraction, demonstrating robustness across varied cabin lighting conditions.
+Hypothesis 2: User Feedback
+* Null Hypothesis (H??): The VisDrive system does not receive a statistically significant positive user feedback rating (usability and safety perception) from the respondents.
+* Alternative Hypothesis (H??): The VisDrive system receives a statistically significant positive user feedback rating (usability and safety perception) from the respondents.
+1.5 Research Objectives
+	This study aims to design, develop, and evaluate a real-time monitoring system that effectively detects driver distraction and provides immediate notifications to mitigate road risks.
+	1.5.1 General Objective
+	To design and develop VisDrive: An Efficient Driver Attention Monitoring System Using Facial Landmarks on Embedded Systems.
+	1.5.2 Specific Objectives
+1. To design and develop a computer vision model utilizing MediaPipe and OpenCV capable of detecting driver eye movements and gaze direction in real-time.
+2. To determine and implement temporal distraction thresholds based on geometric gaze deviations to accurately identify 'eyes-off-road' events.
+3. To develop a real-time alert mechanism that produces a distinct audible warning when the distraction threshold is exceeded, ensuring minimal system latency.
+4. To integrate the monitoring system into a dashcam-based embedded platform (Raspberry Pi 5) for on-device processing.
+5. To evaluate the system's effectiveness and usability by conducting field tests with licensed drivers, measuring detection accuracy, response time, and user satisfaction through ISO 25010 metrics.
+
+1.6 Significance of the Study
+	The findings of this research are expected to provide significant benefits to various stakeholders in the transport and safety communities:
+* Professional Drivers (Freight & Public Transit): Acts as a real-time, localized safeguard that protects overworked commercial drivers from the life-threatening risks of chronic fatigue, sleepiness, and distractions.
+* Fleet Operators and Transport Agencies: Provides a highly affordable, scalable alternative to expensive proprietary safety systems, allowing local logistics companies and public utility operators to easily retrofit their vehicles and better protect their drivers.
+* The General Public: Enhances overall road safety for commuters and pedestrians by proactively preventing heavy-vehicle and public transport collisions caused by driver inattention.
+* Vehicle Safety Technology Developers: Serves as a proof-of-concept for the viability of edge-based AI in automotive safety, proving that high-accuracy monitoring can be achieved with constrained hardware.
+* Future Researchers: Establishes a technical baseline for deploying advanced, lightweight computer vision safety models on edge devices without cellular connectivity, contributing to the body of knowledge in Affective Computing and AI-driven safety solutions.
+1.7 Scope and Limitations
+	This section delineates the specific boundaries and practical constraints of the research to ensure a focused, safe, and feasible evaluation of the VisDrive system. The project is firmly anchored in the local commercial transport sector of Dasmariñas, Philippines, and will be conducted in collaboration with a partnering local transport or logistics company. To guarantee that the system is evaluated by its actual intended users, the study involves a minimum of 50 respondents, strictly limited to individuals holding valid professional driver's licenses who actively operate heavy commercial or public utility vehicles. 
+	Over a continuous period of approximately two months, the researchers will deploy one to three fully functioning hardware prototypes to gather comprehensive baseline data on driver behavior, specifically targeting the accurate detection of "eyes-off-road" visual distraction and physiological drowsiness.
+	Crucially, the empirical evaluation of the VisDrive system is divided into two distinct phases to balance participant safety with ecological validity. The initial data collection and baseline calibration phase will be conducted within stationary heavy vehicles. This controlled environment allows the researchers to safely and accurately establish threshold sensitivities without introducing active collision risks. However, to fully validate the system's practical effectiveness, the operational prototype testing will subsequently be conducted in moving vehicles. This in-motion testing is essential to ensure the hybrid perception pipeline remains robust against the dynamic realities of the Philippine driving environment, specifically accounting for operational variables such as fluctuating ambient lighting, harsh glare, and camera vibrations induced by local road conditions.
+	Because the field tests are stationary, the evaluation will not account for dynamic on-road variables, such as severe cabin vibrations from uneven pavement, sudden shifts in lighting caused by passing streetlights, or the complex physical movements associated with active steering. Furthermore, given that the hardware scale is limited to a maximum of three prototypes, the study focuses solely on localized device efficacy and does not encompass the logistical challenges of a fleet-wide commercial rollout.
+	Technologically, VisDrive is engineered strictly as an internal, localized edge device. Its sole mandate is immediate, in-cabin accident prevention; therefore, it does not support cloud-based data synchronization, nor will it generate longitudinal reports tracking the drivers' long-term behavioral habits over the two-month period. The system also strictly omits any Advanced Driver Assistance Systems (ADAS) features for external road hazard detection, such as lane departure or forward collision warnings. 
+	Finally, while the system’s infrared capabilities are designed to accurately map facial features even when standard prescription eyewear is used, its detection accuracy may naturally be hindered by extreme physical variables, such as drivers wearing heavily tinted sunglasses, thick face masks, or other accessories that cause severe facial occlusion.
+
+
+CHAPTER II
+
+REVIEW OF RELATED LITERATURE
+
+	This chapter provides an extensive review of literature and studies that establish the technical and conceptual framework for VisDrive. The discussion is divided into two main sections: Foreign Literature and Studies, and Local Literature and Studies, focusing on the intersection of Affective Computing, Computer Vision, and Embedded Systems. Finally, a synthesis of the reviewed materials is provided at the end of the chapter to definitively establish the research gap that this study aims to bridge.
+2.1 Foreign Literature and Studies
+	Fundamentally, the complex coordination of sensory and cognitive functions required for safe driving begins with human biology, a concept analyzed by Anderson et al. (2021) in the Handbook of Clinical Neurology. Their research evaluates how selective pathophysiologic insults to "driving-critical systems," specifically vision and attention, place various populations at a higher risk for unsafe driving. Establishing a significant relationship between impaired visual perception and diminished attentional capacity, the authors note that impairment in one system often correlates with deficits in the other. From a neurological perspective, this confirms that vision and attention are the absolute pillars of driver fitness (Anderson et al., 2021), reinforcing the premise that monitoring a driver's visual state is the most direct method for identifying cognitive risks on the road.
+	Translating this biological reality into behavioral driving models, the foundational theory of visual attention is explored through the SPIDER (Scanning, Predicting, Identification, Decision-making, and Executing a Response) model, as updated by Strayer and McDonnell (2025). Their literature emphasizes that driving is a multisensory experience where visual scanning is paramount for maintaining situational awareness. The researchers argue that multitasking significantly degrades a driver’s capacity to process vital environmental information, leading to the dangerous phenomenon of "inattentional blindness," where a distracted driver may completely fail to notice critical information directly in their line of sight. This theoretical framework underscores the necessity of continuous monitoring to prevent the severe cognitive lapses identified in the SPIDER model.
+	To combat these cognitive lapses, modern safety paradigms have shifted from reactive to proactive management, a transition analyzed in the i-DREAMS Policy Brief (2023). Culminating a four-year European Union research initiative, the report introduces a monitoring solution that moves beyond traditional "blame-it-on-the-driver" mentalities. Instead, it evaluates a "safety tolerance zone" by measuring driving parameters alongside driver characteristics, specifically sleepiness and visual distraction. A key finding of the project (i-DREAMS, 2023) is that effective monitoring must account for external contexts to provide instant, proactive recommendations, highlighting the importance of an architecture that uses real-time alerts to coach drivers rather than simply logging their errors after an accident occurs.
+	Recognizing the life-saving potential of these proactive systems, the global regulatory framework has been significantly redefined by Regulation (EU) 2019/2144 of the European Parliament and of the Council. This regulation legally mandates the integration of advanced driver drowsiness and attention warnings in modern vehicles to mitigate human error. Crucially, Recital (10) states that these systems must function effectively without retaining biometric information, strictly adhering to principles of privacy. Furthermore, Recital (14) specifies that monitoring should operate within a closed-loop system, ensuring data is not continuously recorded beyond the immediate purpose of alerting the driver. This legislative mandate confirms that real-time, privacy-conscious monitoring is now a universal standard for automotive safety.
+	Commercially, the industry is rapidly adapting to these mandates. A global market analysis by Future Market Insights (2026) indicates that the Driver Monitoring Systems (DMS) industry is projected to reach a market value of USD 5.7 billion, growing at a CAGR of 8.1% toward USD 12.4 billion by 2036. Notably, the report identifies Camera-Based Systems as the dominant technology segment, capturing a 48% share of the market compared to sensor fusion platforms. Nikhil Kaitwade, Principal Consultant at FMI, emphasizes that minimizing high false-positive rates is critical for market acceptance among privacy-conscious consumers. These strategic implications highlight a global shift toward non-intrusive, camera-based solutions that prioritize high-fidelity detection and real-time processing.
+	Technically, the practical integration of these camera-based techniques relies heavily on geometric facial analysis, as evaluated by Safarov et al. (2023) in their investigation into real-time drowsiness detection. The researchers utilized an eye-blink analysis approach, leveraging landmarks to obtain precise coordinates for the eye and mouth regions. By analyzing blinking rates and mouth shape fluctuations, the study established a clear correlation between yawning and prolonged eyelid closure as primary indicators of a drowsy state. Achieving a 95.8% accuracy for drowsy-eye detection using a threshold-based classification system, their findings confirm that analyzing geometric landmarks provides a robust, real-time framework for identifying physiological fatigue.
+	To extract these complex geometric landmarks accurately, highly precise tracking frameworks are required, a capability demonstrated in a comprehensive study by Chandwani et al. (2023) regarding sign language recognition. The researchers employed the MediaPipe tracking technique in conjunction with a gesture classification model to recognize complex visual patterns. Achieving a significant classification accuracy of approximately 99 percent across metrics such as Recall, F1 Score, and Precision, this research highlights the high generalization qualities of MediaPipe. For vision-oriented applications, the study validates MediaPipe as a highly robust tool for translating physical movements into the verifiable data points needed for behavioral assessment.
+	However, real-world monitoring environments introduce physical variables that algorithms must overcome. The robustness of detection models against such variations is explored by Rahman et al. (2022) through the introduction of the Synthetic Distracted Driving (SynDD2) dataset. Capturing distracted behaviors across multiple in-vehicle camera perspectives, the study specifically included activities involving appearance blocks, such as the wearing of hats or sunglasses, to test the limits of machine learning algorithms. By providing standardized data for randomized activities, the research (Rahman et al., 2022) underscores the absolute necessity of accounting for physical obstructions and varied camera angles to ensure system resilience in real-world driving scenarios.
+	Processing such complex visual variations requires highly optimized algorithms, a necessity examined by Lei et al. (2025) in their development of an intelligent network framework. Proposing the RES-SE-CNN model, which integrates an attention mechanism into a Residual Network architecture, the researchers achieved a superior recognition rate of 97.28% against classical models like VGG19 and ResNet50. Crucially, the study notes that this optimized architecture is characterized by lower memory occupancy, rendering it highly amenable to deployment on vehicle mobile terminals. These findings provide a strong justification for utilizing lightweight, attention-based models to maintain high detection accuracy on hardware with constrained computational limits.
+	Ultimately, deploying these optimized models directly inside the vehicle represents a systemic architectural shift, comprehensively analyzed by Abou Ali et al. (2025) in their review of Edge Artificial Intelligence. Examining the transition from cloud-dependent computing to modern on-device processing, the researchers highlight that embedding intelligence directly into edge devices enables real-time processing with significantly reduced latency. Furthermore, it inherently improves privacy by processing data close to its source (Abou Ali et al., 2025). This systematic review provides the ultimate theoretical foundation for localized hardware deployment, ensuring that life-saving monitoring systems remain completely functional without relying on external internet connectivity.
+2.2 Local Literature and Studies
+	In the Philippine context, the necessity for such life-saving technology is underscored by a critical nationwide safety crisis, as quantified in the Philippines Road Safety Profile 2025 (Asian Transport Observatory, 2025). Identifying road crashes as a massive socio-economic burden, the report notes that fatalities and injuries cost the economy an estimated USD 11 billion in 2021, roughly 3% of the national GDP. Despite targets set in the Philippine Road Safety Action Plan 2023-2028, the country’s progress severely lags behind regional peers, experiencing only a -4.7% annual decrease in deaths. This data vividly highlights the urgency for aggressive technological innovations to bridge the gap between policy ambitions and actual survival rates on the road.
+	Compounding this crisis is the perilous state of the country's physical infrastructure. Data from the International Road Assessment Programme (iRAP, 2025) reveals that only 5% of Philippine roads achieve a 3-star or better rating for pedestrians, while motorcyclists face similarly hazardous conditions. With an alarming rate of 36 fatalities per thousand kilometers of road, the complexity of the local road environment is characterized by rapid motorization and highly vulnerable users. This infrastructural deficit suggests that relying on road improvements alone is insufficient, creating a dire need for vehicle-based safety technologies that provide drivers with real-time awareness to navigate these high-risk corridors.
+	Within this dangerous environment, specific human errors act as the primary catalysts for disaster, a relationship examined by Castilla et al. (2024) from the Cebu Technological University-Danao Campus. Investigating public utility drivers at the Danao City terminal, the researchers found that while cognitive distractions had minimal effects, manual and visual distractions were the overwhelming causes of local road incidents. The study uncovered that even rare occurrences of drivers taking their eyes off the road significantly correlated with accident encounters, providing an empirical basis for prioritizing visual monitoring to protect the local public transport sector.
+	This assessment is strongly corroborated by a foundational study from the University of Mindanao. Osorio, Montano, Apuya, and Gempesao (2025) investigated the relationship between driver behavior and safety practices among 300 commuters in Davao City. Utilizing the Road Safety Perception Questionnaire (RSPQ), the researchers identified a significant correlation between "risky driving behaviors" such as impatient overtaking and momentary lapses in attention and severe safety outcomes. Emphasizing a critical need for enhanced monitoring to curb these violations, the research provides a direct statistical justification for implementing real-time systems to correct the risky behaviors pervasive among local road users.
+	Understanding why these risky behaviors occur requires examining the grueling realities of the local transport sector. The Public Utility Vehicle Modernization Program (PUVMP), detailed in the Jeepney+ NAMA framework (DOTr & GIZ, 2018), aims to replace aging fleets with safer alternatives. However, while aiming for modernization, the transition toward formalized shift-patterns has drastically increased vehicle operating hours from 14 to up to 19 hours per day (GIZ, 2021). This operational reality forces drivers to push their physical limits, underscoring the necessity for technological interventions capable of monitoring extreme exhaustion during these extended shifts.
+	Despite the clear need to protect exhausted drivers, economic constraints create a massive barrier to adoption. A report from Philstar.com (2025) details the Department of Transportation's push for PUV consolidation, a mandate that has faced severe pushback from transport groups like Piston and Manibela due to the crippling financial burden it places on small-scale operators. This highlights a distinct "safety and economic deadlock" in the Philippines: while operators desperately need modern safety systems, they absolutely require low-cost, non-proprietary solutions that can be integrated without causing operational bankruptcy.
+	Furthermore, even if operators could afford advanced cloud-based safety systems, the local digital infrastructure cannot support them. The Digital Cities 2025 Location Primer (2020), published by the Department of Information and Communications Technology (DICT), highlights massive disparities in telecommunications capacity outside of Metro Manila. The DICT framework confirms that highly inconsistent connectivity necessitates localized digital solutions. This government roadmap validates the absolute necessity of "Edge Computing" for local transport; safety systems must process data entirely within the vehicle to remain functional across provincial dead zones.
+	Beyond infrastructure, there is also a deep-seated cultural barrier regarding data privacy. According to the UNESCO Readiness Assessment Methodology (RAM) Report for the Philippines (2024), the country faces significant public skepticism regarding artificial intelligence. The report highlights a prevailing "anxiety" among Filipinos concerning AI-enabled tools, fueled by a lack of trust in data retention and privacy frameworks. By advocating for ethics as a defining hallmark of AI deployment, the UNESCO findings provide a strong socio-technical justification for an edge-based architecture, a system that processes facial data instantly without ever saving or uploading it to the cloud.
+	Proving that this localized, edge-computing approach is highly viable in the Philippines, Tarun et al. (2023) from Ateneo de Manila University deployed vision-based detection models on embedded hardware. Testing YOLOv5 on a resource-constrained Raspberry Pi 4 Model B, the researchers achieved an impressive classification accuracy of 95%. While noting that inference speeds were lower than desktop computers, the model successfully processed images dynamically without external servers. These findings serve as a vital technical proof of concept, confirming that affordable Raspberry Pi devices can effectively shoulder the computational weight of local monitoring tasks.
+	Building on this hardware viability, the robustness of embedded systems under challenging local environmental conditions was demonstrated by Bermoy and Sanchez (2025) at the Philippine Science High School. Proposing a hybrid driver distraction system, they deployed a landmark-based gaze estimation framework on a newer Raspberry Pi 5. Validating the system's resilience, it achieved an overall accuracy of 95.2% despite intense tropical daylight, dim nighttime illumination, and the presence of prescription eyewear. This confirms that landmark-based edge computing is highly capable of maintaining accuracy across the diverse and challenging lighting conditions characteristic of the Philippines.
+	Finally, the ability to translate this localized detection into immediate, life-saving action is showcased by Boon et al. (2026) through "Lumina Alert." Tested on a Toyota Avanza and powered by edge computing, the system monitored facial drowsiness indicators to trigger multi-modal interventions, including a 7-millisecond auditory alert and an ignition lockout mechanism. Achieving a 93.1% detection accuracy, the system successfully prevented vehicle operation in 95% of drowsy cases. For the current research, this provides the ultimate benchmark, proving that affordable, localized edge AI can completely bridge the gap between behavioral detection and physical accident prevention on Philippine roads.
+2.3 Synthesis
+	The extensive review of both foreign and local literature reveals a clear convergence between the biological imperative of driver attention and the rapid advancement of artificial intelligence. Globally, legislative mandates and market trends have established non-intrusive, camera-based monitoring as the gold standard for proactive road safety. Locally, the staggering socio-economic cost of traffic fatalities and the grueling, 19-hour shifts demanded by the public transport sector underscore an urgent, life-or-death need for these exact interventions. Furthermore, technical studies have consistently proven that localized edge computing, specifically utilizing devices like the Raspberry Pi combined with geometric facial tracking, is highly capable of processing complex visual data in real-time. The science, the legislation, and the foundational hardware capabilities all point toward a future of automated driver protection.
+	However, a critical socio-technological gap remains deeply entrenched within this literature. While highly accurate monitoring algorithms exist, they are structurally gatekept; they are typically confined to luxury vehicles, proprietary fleet management ecosystems, or architectures that demand robust, uninterrupted cloud connectivity. In the Philippine context, characterized by extreme economic constraints for small-scale operators and sprawling provincial "dead zones" with zero internet infrastructure, these advanced systems are functionally useless. Furthermore, while previous local studies have successfully benchmarked the concept of embedded AI, there remains a distinct lack of a fully integrated, accessible, and privacy-compliant intervention system engineered specifically for the harsh realities of local heavy commercial vehicles. This is the precise gap VisDrive aims to bridge. By synthesizing high-fidelity visual tracking with standalone edge computing, VisDrive seeks to equalize road safety, placing them directly into the cabins of the overworked drivers who need them the most, utilizing a localized Raspberry Pi 5 architecture combined with a hybrid perception algorithm.
+
+
+
+
+CHAPTER III
+
+RESEARCH METHODOLOGY
+	This chapter details the technical and methodological processes used to design, develop, and evaluate VisDrive. The discussion outlines the software development methodology, conceptual and operational frameworks, core algorithms and mathematical formulas, system flow diagrams, and the specific respondents selected for field testing.
+3.1 Software Development Methodology
+3.1.1 Prototyping Model
+	The researchers employed the Prototyping Model as the primary software development life cycle (SDLC) for the engineering of the VisDrive system. Given the hybrid nature of the architecture, fusing high-fidelity geometric landmark tracking with a deep learning-based drowsiness classifier, an iterative approach was strictly necessary. Unlike rigid linear frameworks, the Prototyping Model allowed the development team to balance the high computational demands of a Convolutional Neural Network (CNN) with the real-time latency requirements of an edge device.	
+
+
+
+
+
+
+
+
+3.1.1.1 Figure of Prototyping Model
+
+1. Requirement Analysis 
+	For the initial requirements phase, the researchers established the operational boundaries for a hybrid detection system tailored for the Philippine logistics sector. The proponents defined the Raspberry Pi 5 as the target hardware to provide the necessary ARM-NEON acceleration for dual-layer processing. Beyond physical sensors, the team identified the requirement for three specific datasets: the MRL Eye Dataset, the Driver Drowsiness Dataset (DDD), and the Driver Monitoring Dataset (DMD) to provide a varied, subject-agnostic foundation for training the neural classifier. Hardware requirements remained focused on offline reliability, utilizing an Infrared Camera for photometric robustness and an active 5V piezo buzzer for localized intervention.
+
+2. Quick Design
+	Following the establishment of hardware constraints, the team developed a structural blueprint for the system's perception-to-decision logic flow. This phase focused on a modular design across three Python components: one for leakage-free data splits, one for model fitting, and one for live execution. The design prioritized a priority-ordered state machine to ensure the system could logically fuse geometric signals with neural probabilities without causing memory overflow.
+3. Cross-Platform Prototyping 
+	To ensure high accuracy before introducing hardware limitations, the machine learning pipeline was developed and optimized on high-performance workstations. The researchers implemented a MobileNetV3-Small backbone, applying a two-stage transfer learning schedule: an initial feature-extraction stage to stabilize the classifier head, followed by a fine-tuning stage to specialize the backbone parameters. During this phase, data augmentations such as Gaussian blur and random erasing were implemented to simulate environmental cabin challenges like camera defocus and partial occlusions (Howard et al., 2019).
+4. Hardware Migration 
+	Once the model was validated, it was exported to the Open Neural Network Exchange (ONNX) format to optimize the CPU and ARM-NEON backend on the Raspberry Pi. This phase introduced the square eye-region cropping algorithm, which uses facial landmarks to extract a square bounding box of the eyes, preventing the vertical stretching that degrades accuracy in standard rectangular crops. The proponents also integrated the cv2.solvePnP algorithm to mathematically recover head pose directly on the ARM architecture.
+5. Refinement
+	With the system running on the Raspberry Pi 5, the team engaged in continuous refinement to stabilize performance. The researchers implemented temporal smoothing using a 15-frame rolling mean to prevent single-frame flickers in the drowsiness probability. A crucial addition was the per-driver baseline correction. Recognizing that varying eye shapes and skin tones create different baselines, the team programmed a 2.5-second calibration window at session start to sample neutral features, adjusting alert thresholds as specific deltas above the individual driver's baseline (Fridman et al., 2018).
+6. Final Product 
+	The culmination of the iterative cycle resulted in a standalone, Hybrid VisDrive Prototype. The finalized system operates as a unified perception loop, achieving a latency target of ? 50ms per frame while simultaneously monitoring geometric and neural signals. Powered by a 5V 3A source, the system is fully vehicular-mobile and ready for empirical validation against the DMD dataset to confirm its detection accuracy under professional driving conditions.
+
+
+
+
+3.2 Conceptual Framework
+Figure 3.2.1 Conceptual Framework Diagram
+
+	The conceptual framework of VisDrive delineates the systematic progression from theoretical problem identification to physical technological intervention. Grounded in the problem domain of driver fatigue and visual distraction, the framework integrates established theoretical foundations such as the scanning, predicting, identifying, decision-making, and executing (SPIDER) model of visual scanning (Strayer et al., 2015). To operationalize these theories, the Input Layer relies on localized edge computing paired with comprehensive data foundations including live video from an OVP Infrared Camera. This layer utilizes a unified classification dataset derived from the MRL Eye Dataset, the DDD, and the DMD to provide a subject-disjoint foundation for neural training. Furthermore, the input stage incorporates per-session personalization through a 2.5-second neutral baseline calibration window to account for individual variations in driver physiology.
+	The acquired data is processed by the Process Layer, which functions as a hybrid perception engine to transform raw frames into structured numerical signals. This engine executes a dual-path architecture where the geometric path utilizes the MediaPipe framework to build perception pipelines through facial landmark extraction (Lugaresi et al., 2019). This path computes specific metrics including the Eye Aspect Ratio (EAR) for drowsiness following the Soukupová and ?ech (2016) template, iris-offset gaze ratios, and head orientation via the Perspective-n-Point (solvePnP) algorithm to address the challenges of head pose estimation (Murphy-Chutorian & Trivedi, 2009). Simultaneously, the neural perception path extracts a square eye-region crop processed by a MobileNetV3-Small Convolutional Neural Network (CNN) to generate a drowsiness probability score. These paths converge at a Fusion Point governed by a priority-ordered state machine, which manages signal hierarchies to issue alert decisions based on established safety criteria like the two-second rule for visual distraction (Klauer et al., 2006).
+	Upon breaching defined thresholds, the architectural flow transitions into the Output Layer to execute localized interventions. If the driver’s metrics reflect a normal state, the system maintains monitoring and logs calibration records; however, if a distraction or fatigue event is detected, the system triggers a physical 5V piezo buzzer. The finalized prototype is evaluated through rigorous empirical testing for detection accuracy and system latency based on the ISO/IEC 25010 software quality model, which provides a structured guide for evaluating software product quality (ISO/IEC, 2011).
+
+3.3 Algorithms 
+3.3.1. Hybrid Perception Pipeline
+3.3.1.1. VisDrive Hybrid Pipeline Diagram
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
+	The VisDrive application utilizes a hybrid perception pipeline that transforms raw video feeds into actionable safety alerts, particularly valuable in commercial transport where edge computing ensures real-time safety without cloud connectivity. Rather than relying on a single object detection approach, the researchers implemented a dual-path architecture combining geometric landmark extraction and a MobileNetV3-Small deep learning classifier. This algorithm represents a highly optimized approach for embedded systems, enabling robust inference with high accuracy on resource-constrained devices (Howard et al., 2019). The core algorithmic approach divides the workload into continuous spatial coordinate tracking and texture-based convolutional analysis.
+	The researchers began with preprocessing each input image from the OVP infrared camera to a standardized spatial resolution. The frame is first passed through the MediaPipe FaceLandmarker framework, which extracts exactly 478 normalized 3D landmarks in a single computational pass, adding internal Kalman-style temporal smoothing for video mode (Lugaresi et al., 2019). The system geometrically computes physiological metrics, including the Eye Aspect Ratio (EAR) to measure eyelid closure (Soukupová & ?ech, 2016) and Perspective-n-Point (solvePnP) mapping to recover head pitch, yaw, and roll.
+	To complement the geometric data, the pipeline executes a complementary neural path. Using the extracted landmarks, a square eye-region crop is dynamically generated to prevent vertical stretching. This crop is converted to grayscale, replicated to three channels, and passed into the MobileNetV3-Small classifier running on an optimized ONNX backend. The deep learning model predicts a precise drowsiness probability score based on texture and contour. Finally, a priority-ordered state machine fuses these dual signals, evaluating them against a personalized 2.5-second per-driver baseline to accurately trigger the localized hardware intervention.
+Steps in Algorithm:
+1. Capture and preprocess the live video frame from the camera feed.
+2. Detect 478 3D facial landmarks using the MediaPipe FaceLandmarker model.
+3. Compute geometric features (EAR, Iris Ratios, Head Pose) from the extracted landmarks.
+4. Extract a square eye-region crop based on the landmark bounding boxes to prevent distortion.
+5. Preprocess the square crop (grayscale conversion, resize to 224x224, tensor normalization).
+6. Run the preprocessed crop through the MobileNetV3 ONNX model to extract drowsiness probability.
+7. Apply a rolling-average temporal smoothing window to the raw probability scores.
+8. Evaluate combined signals against per-driver baselines via a priority-ordered state machine.
+9. Return the final decision state and trigger the GPIO buzzer if safety thresholds are breached.
+Time Complexity:
+  1. MediaPipe Inference:
+O(W ? H + L)(1)     where:
+* W = width of the input frame
+* H = height of the input frame
+* L = number of facial landmarks (478)
+2. Square Eye-Region Crop:
+O(S²)(2)     
+     where:
+* S = side length of the square crop (224 pixels)
+3. MobileNetV3 Inference:
+O(H ? W ? C?? ? (K² + C???))(3)      where:
+* H, W = Spatial dimensions of the input feature map
+* C??, C??? = Number of input and output channels
+* K = Size of the convolutional kernel
+Mathematical Representation:
+1. Eye Aspect Ratio (EAR):
+(4)where:
+*                         = 2D spatial coordinates defining the six-point eye contour
+
+
+2. Horizontal Iris Ratio:
+(5)where:
+* x???? = x-coordinate of the iris geometric centroid
+* x?????  = x-coordinate of the inner eye corner anchor
+* x????? = x-coordinate of the outer eye corner anchor
+3. Temporal Smoothing (Rolling Mean):
+(6)where:
+* K = window length (15 frames)
+* p? = raw probability score at frame i
+4. State Machine Baseline Delta:
+(7)       where:
+*                            = per-driver calibration mean
+*  ? = trigger threshold (0.35)
+
+Pseudocode:
+FUNCTION processFrame(image, baselineData):
+    isProcessing = true
+    
+    TRY:
+        // --- PERCEPTION: START ---
+        // 1. Run MediaPipe FaceLandmarker
+        landmarks = mediaPipe.detectForVideo(image)
+        
+        IF landmarks is EMPTY:
+            classifier.applyDecayFactor(0.9)
+            RETURN STATE_FACE_LOST
+            
+        // 2. Geometric Feature Extraction
+        ear = (computeEAR(landmarks[RIGHT_EYE]) + computeEAR(landmarks[LEFT_EYE])) / 2
+        irisH, irisV = computeIrisRatios(landmarks)
+        pitch, yaw, roll = solvePnP(landmarks, MODEL_POINTS_3D)
+        
+        // 3. Neural Classifier Processing
+        eyeCrop = cropSquareEyeRegion(image, landmarks, padding=0.6)
+        preprocessedData = preprocessForCNN(eyeCrop)
+        
+        // 4. Run MobileNetV3 ONNX Inference
+        logits = onnxSession.run(preprocessedData)
+        rawProbability = softmax(logits)[DROWSY_CLASS_INDEX]
+        
+        // 5. Apply Temporal Smoothing
+        smoothedProb = calculateRollingMean(rawProbability, windowSize=15)
+        // --- PERCEPTION: END ---
+        
+        // 6. Fusion and State Machine
+        deltaProb = smoothedProb - baselineData.ml_baseline
+        
+        IF (yaw > 25 OR pitch > 25) FOR 2.0_SECONDS:
+            currentState = STATE_HEAD_OFF_ROAD
+            
+        ELSE IF deltaProb > 0.35 FOR 1.5_SECONDS:
+            currentState = STATE_YAWNING
+            
+        ELSE IF perclos70 > 0.15:
+            currentState = STATE_EYES_CLOSED
+            
+        ELSE:
+            currentState = STATE_ATTENTIVE
+            
+        // 7. Trigger localized hardware intervention
+        IF currentState != STATE_ATTENTIVE:
+            triggerHardwareBuzzer()
+            
+        RETURN currentState
+3.4 Operational Framework
+3.4.1. Operational Framework Diagram
+
+	The researchers implemented a comprehensive operational framework organized into three interconnected phases: Input, Process, and Output. The diagram systematically transforms raw vehicular camera feeds into actionable safety interventions for commercial drivers.
+	The Input phase establishes the foundation for the system's real-time perception and personalization. It begins with data acquisition through a continuous live video feed captured via an OVP infrared camera, ensuring consistent visibility across varied and dynamic cabin lighting conditions. To tailor the detection thresholds to individual physiological traits, the system records a 2.5-second driver calibration baseline at the start of each session. Furthermore, the underlying intelligence of the system is rooted in the integration of the MRL, DDD, and DMD training datasets, which provide the robust, diverse foundation necessary for the machine learning models to generalize across different facial structures and environmental scenarios.
+	The Process phase acts as the core analytical engine, leveraging a hybrid perception architecture to evaluate driver attention. This phase executes parallel operations: first, it performs geometric extraction utilizing the MediaPipe framework to continuously calculate structural metrics such as the Eye Aspect Ratio (EAR), head pose, and gaze deviation. Concurrently, it executes deep learning classification via a MobileNetV3-Small Convolutional Neural Network (CNN) to evaluate cropped eye regions for drowsiness probability. To reconcile these parallel computational streams, the system utilizes signal fusion governed by a priority-ordered state machine. This state machine hierarchically evaluates the metrics, filtering out transient false positives and determining the definitive state of the driver through logical threshold comparisons.
+	Finally, the Output phase transforms the processed data into tangible, real-time safety mechanisms. Based on the state machine's logic, the system yields a continuous driver attention state evaluation. If a sustained distraction or drowsiness threshold is breached, the system triggers an immediate hardware intervention via an active 5V piezo buzzer to alert the driver and mitigate potential accidents. Simultaneously, the system generates real-time probability logs and system monitoring records, ensuring the entire operational cycle is documented for offline analysis and performance evaluation without relying on cloud connectivity.
+
+3.5 Use Case / Flowchart / State Diagram
+	The VisDrive application is designed to streamline and enhance the process of driver attention monitoring, particularly for Public Utility Vehicle (PUV) operators who face challenging operational environments that contribute to fatigue-related visual distraction. The system leverages advanced computer vision (MediaPipe facial landmarks) and deep learning (MobileNetV3 drowsiness classification) technologies to provide real-time, accessible, and accurate driver attention information via an edge-based, offline interface deployment.
+3.5.1. Use Case
+3.5.1.1 Use Case Diagram
+
+	VisDrive serves one primary actor: the Driver (PUV operator). Interacting through the edge-based deployment hardware, the application functions autonomously with minimal active driver input after initial setup. The process begins with the hardware initialization where the OVP Infrared Camera feed starts. Within the initial phase, the user is required to complete a 2.5-second neutral baseline calibration, allowing the system to personalize physiological thresholds. Using the hybrid perception engine, the application dynamically processes the live feed to detect landmarks (Path A) and extract eye-region texture (Path B) to evaluate the driver for specific attention metrics including EAR, Head Pose deviation, and Iris offset.
+	If conflicting signals exist, the system applies the priority-ordered state machine fusion logic to resolve the metrics into a definitive state (e.g., Yawning, Eyes Off-Road, Head Off-Road, or Attentive). Users receive real-time, localized feedback via the hardware’s 5V active piezo buzzer only when safety thresholds are critically breached for a sustained duration. Throughout this continuous monitoring loop, the system executes real-time probability logs and records frames since the face was last detected, ensuring system robustness and logging integrity without cloud dependencies. If the face is lost by MediaPipe, the user is prompted through decay logic to re-align, ensuring a stable experience.
+
+
+
+
+
+
+3.5.2. Flowchart
+3.5.2.1 Flowchart Diagram
+
+	The flowchart illustrates the sequential, conditional, and priority-ordered step-by-step logic of the hybrid VisDrive perception pipeline, modeled after the academic flow documented in established driving safety technology standards. The process begins on the edge device hardware where the system captures the raw image from the OVP infrared camera. The captured image immediately undergoes preprocessing for standardization before being analyzed by the MediaPipe FaceLandmarker model in a continuous loop.
+	If a face is successfully detected, the workflow branches into the dual-path perception engine, geometrically extracting signals (Path A for EAR and Pose) and classifying textures (Path B for CNN probability). If face detection fails, the system executes probability decay logic and loops back to capture. The dual signals then converge at the state machine for fusion logic comparison against the personalized calibration baseline. If an alert state is sustained past the defined temporal threshold, the workflow triggers the hardware buzzer and generates probability logs. This structured process ensures the driver receives immediate localized feedback minimizing the risk of collision through prompt behavioral warnings.
+
+
+
+
+
+
+
+
+
+
+
+3.5.3 State Diagram
+3.5.3.1. State Diagram
+
+	The state diagram highlights the dynamic behavior of the VisDrive application as it transitions between operational modes based on real-time hardware constraints, driver physiology, and priority-ordered logic rules, consistent with advanced driving assist protocols. The application begins in the Hardware Initialization state where environmental photometric conditions are standardized. The system transitions to the critical Calibration Baseline state once a successful face mesh is established by MediaPipe, where a neutral profile is recorded for 2.5 seconds to establish personalized thresholds.
+	Following calibration, the application enters the continuous, parallel Geometric Extraction and Neural Classification states, where landmark coordinates and probability scores are generated dynamically. These concurrent states are fused at a decision point where metrics are evaluated in a strict hierarchy; for example, prioritizing head orientation deviations over eye closure signals to issue alerts for the most critical impairment. The state diagram ensures the driver remains informed of their attention state, minimizing the risk of cognitive capture during monotonous commutes through proactive tactile feedback.
+3.6 Respondents of the Study
+	The researchers decided that they will conduct surveys and empirical prototype testing to gather the needed data from respondents. To facilitate a structured and realistic data gathering process, the researchers will partner with a commercial transport or fleet management company operating within the CALABARZON region. Surveys and user acceptance tests are chosen as the primary data collection methods for their effectiveness in collecting standardized information from this diverse sample population. This is essential for evaluating the VisDrive application's usability, performance efficiency, and perceived effectiveness as a safety intervention across different transport sector groups.
+3.6.1 Probability Sampling: Stratified Random Sampling
+	The study will employ stratified random sampling, a probability sampling technique where the population is divided into distinct subgroups (strata) before selecting samples from each stratum. The sampling frame will be drawn from the operational network of the partner company in CALABARZON. This will ensure representation from all potential interacting groups of the VisDrive system. It will also reduce sampling error by creating homogeneous subgroups and will provide more accurate population estimates rather than just random sampling. This will display clear differences in how the safety technology is perceived by those operating the vehicle versus those managing the fleets or commuting.
+3.6.2 Population and Strata
+	The population will be stratified into three distinct groups sourced through the CALABARZON partner company's network to ensure comprehensive feedback across the commercial transport sector:
+
+
+
+
+
+
+
+Population (n = 50)
+3.6.2.1 Distribution of Research Respondents
+StratumDescriptionTarget Sample Size (n)PUV DriversLicensed commercial Public Utility Vehicle drivers employed by or affiliated with the partner company who will directly interact with the system.30Transport Operators / Fleet ManagersIndividuals managing PUV fleets or transport cooperatives who evaluate the system's logging and safety compliance benefits.10Regular CommutersEveryday passengers of PUVs who can provide feedback on the perceived safety value and non-intrusiveness of the localized buzzer alerts.10
+3.6.3 Data Collection Instruments
+	A structured questionnaire will be developed and administered to collect data from all respondent groups following prototype demonstrations. The questionnaire will contain both closed and open-format questions, heavily grounded in the ISO/IEC 25010 software quality model to specifically measure user acceptability, performance efficiency (e.g., perceived latency), and functional suitability. In addition to questionnaires, empirical observation logs will be recorded during prototype testing to capture quantitative metrics (hardware latency and detection accuracy), and brief interviews will be conducted to ensure information is accurate enough for public deployment.
+
+3.6.4 Data Analysis Methods
+3.6.4.1 Descriptive Statistics
+	Descriptive statistics will be used to summarize and interpret the data collected from the study. Measures of central tendency, such as the mean, median, and mode, will be calculated to understand the typical values within the dataset, particularly for Likert-scale responses regarding user acceptance. Measures of dispersion, including standard deviation, variance, and range, will be used to assess the spread or variability of the data, which is highly relevant for evaluating the consistency of the system's sub-50ms latency target. Additionally, frequency distributions and percentages will be computed for categorical variables to provide an overview of data patterns. Cross-tabulations will also be used to examine potential relationships and interactions between variables.
+3.6.4.2 Inferential Statistics
+	To draw conclusions beyond the immediate data, inferential statistical methods will be applied. Chi-square tests will be conducted to assess significant associations between categorical variables (e.g., a driver's years of experience versus their acceptance of AI monitoring). T-tests and Analysis of Variance (ANOVA) will be utilized to compare mean values across the different user groups, helping to identify statistically significant differences in satisfaction between drivers, operators, and commuters. Correlation analysis will be performed to explore the strength and direction of relationships between continuous variables. Where necessary, regression analysis may also be employed to identify factors that influence user satisfaction and application effectiveness.
+3.6.5 Ethical Considerations
+	The researchers will follow strict ethical guidelines to protect participants' rights, privacy, and welfare throughout the study. All participants will be asked to sign informed consent forms before proceeding with the study, which contains an outline of the purpose and objectives of the research, the voluntary nature of participation, the right to withdraw at any time without penalty, data collection procedures and duration, and potential risks and benefits in participation. Any conflicts of interest will be disclosed before and during the study to maintain transparency.
+	Privacy and confidentiality of all collected data will be strictly protected, which is of paramount importance given the camera-based nature of the VisDrive system. The researchers will assure participants that the live video feed utilized by the system is processed entirely offline on the edge device, with no facial imagery recorded or transmitted to cloud servers. All electronic questionnaire data will be collected through Google Forms, which provides built-in security features including SSL encryption for data transmission, secure cloud storage with enterprise-grade security infrastructure, and access only to authorized research members. Data protection measures will include limited access protocols, ensuring that all collected information is available only to researchers.
+	The study will employ stratified random sampling to ensure fair selection of participants across different groups, preventing bias and avoiding overrepresentation or underrepresentation of specific demographics while maintaining inclusivity and diversity in the sampling approach. The researchers commit to responsible reporting by handling all findings with integrity and providing accurate feedback without misrepresentation. They will acknowledge the limitations of the research and share results with participants who express interest in the outcomes. All ethical protocols will be reviewed and approved by the appropriate review boards before the commencement of data collection as the researchers maintain objectivity and transparency throughout the entire research process.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+REFERENCES
+AAA Foundation for Traffic Safety. (2023). Drowsy Driving Is a Factor in 21% of Fatal Crashes. Why Don’t We Talk About It More?. https://www.sleepfoundation.org/sleep-news/drowsy-driving-is-a-factor-in-21-percent-of-fatal-crashes.
+Abou Ali, M., Dornaika, F., Cherafeddin, J. (2025). Agentic AI: a comprehensive survey of architectures, applications, and future directions, https://www.researchgate.net/publication/397626041_Agentic_AI_a_comprehensive_survey_of_architectures_applications_and_future_directions.
+Akkarasrisawad, P., & Vanichkobchinda, P. (2025). Serial Mediation Effects of Driver Fatigue and Cognitive Impairment on the Relationship Between Occupational Stressors and Wellbeing Among Commercial Truck Drivers: A PLS-SEM Analysis. https://www.mdpi.com/2071-1050/17/24/11162.
+Anderson, D., Ghate, D. A., & Rizzo, M. (2021). Vision, attention, and driving. Handbook of Clinical Neurology. https://www.researchgate.net/publication/350632818_Vision_attention_and_driving. 
+Bermoy, L., & Sanchez, J. (2025). Development and Evaluation of a Vision-Based Driver Distraction Detection System using Hybrid Eye- Tracking and 3D Head Pose Estimation. https://www.researchgate.net/publication/398665627_Development_and_Evaluation_of_a_Vision-Based_Driver_Distraction_Detection_System_using_Hybrid_Eye-_Tracking_and_3D_Head_Pose_Estimation. 
+Bhasker, V. V., Bachu, S., Veeresh, A., Anusha, S., Rani, P., Naga Pavansai, K. (2025). Driver Drowsiness Detection System Using Raspberry Pi. https://www.ijsred.com/volume8/issue3/IJSRED-V8I3P553.pdf. 
+Boon, [insert initial]., [insert remaining co-authors' last names and initials]. (2026). [insert article title]. [insert journal name], [insert volume]([insert issue]), [insert page range].
+Castilla, [insert initial]., [insert remaining co-authors' last names and initials]. (2024). [insert article title]. [insert journal name], [insert volume]([insert issue]), [insert page range].
+Centers for Disease Control and Prevention. (2024). [insert title of webpage or report]. U.S. Department of Health & Human Services. [insert URL]
+Chandwani, [insert initial]., [insert remaining co-authors' last names and initials]. ([insert year]). [insert article title]. [insert journal name], [insert volume]([insert issue]), [insert page range].
+Department of Information and Communications Technology. (2020). Digital cities 2025 location primer. DICT.
+Department of Transportation, & Deutsche Gesellschaft für Internationale Zusammenarbeit. (2018). Jeepney+ NAMA framework. [insert URL or publisher if applicable].
+European Parliament and Council. (2019). Regulation (EU) 2019/2144 of the European Parliament and of the Council. Official Journal of the European Union.
+Fonseca, [insert initial]., & Ferreira, [insert initial]. (2025). [insert article title]. [insert journal name], [insert volume]([insert issue]), [insert page range].
+Fridman, L., Reimer, B., Mehler, B., & Freeman, W. T. (2018). [insert article title]. [insert journal name], [insert volume]([insert issue]), [insert page range].
+Future Market Insights. (2026). Driver monitoring systems market analysis. FMI. [insert URL if applicable]
+Gao, [insert initial]., [insert remaining co-authors' last names and initials]. (2024). [insert article title]. [insert journal name], [insert volume]([insert issue]), [insert page range].
+Howard, A., Sandler, M., Chu, G., Chen, L.-C., Chen, B., Tan, M., ... & Adam, H. (2019). Searching for MobileNetV3. Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV), 1314–1324.
+i-DREAMS. (2023). i-DREAMS policy brief: Proactive safety management. European Union Horizon 2020.
+International Organization for Standardization. (2011). Systems and software engineering — Systems and software Quality Requirements and Evaluation (SQuaRE) — System and software quality models (ISO/IEC 25010:2011).
+International Road Assessment Programme. ([insert year]). [insert title of report]. iRAP. [insert URL if applicable]
+Klauer, S. G., Dingus, T. A., Neale, V. L., Sudweeks, J. D., & Ramsey, D. J. (2006). The impact of driver inattention on near-crash/crash risk: An analysis using the 100-car naturalistic driving study data. National Highway Traffic Safety Administration.
+Lei, [insert initial]., [insert remaining co-authors' last names and initials]. (2025). [insert article title]. [insert journal name], [insert volume]([insert issue]), [insert page range].
+Lugaresi, C., Tang, J., Nash, H., McClanahan, C., Uboweja, E., Hays, M., ... & Grundmann, M. (2019). MediaPipe: A framework for building perception pipelines. arXiv preprint arXiv:1906.08172.
+Murphy-Chutorian, E., & Trivedi, M. M. (2009). Head pose estimation in computer vision: A survey. IEEE Transactions on Pattern Analysis and Machine Intelligence, 31(4), 607–626.
+Osorio, [insert initial]., Montano, [insert initial]., Apuya, [insert initial]., & Gempesao, [insert initial]. (2025). [insert article title]. [insert journal name], [insert volume]([insert issue]), [insert page range].
+Pawar, [insert initial]., [insert remaining co-authors' last names and initials]. (2025). [insert article title]. [insert journal name], [insert volume]([insert issue]), [insert page range].
+Peters, [insert initial]., [insert remaining co-authors' last names and initials]. (2021). [insert article title]. [insert journal name], [insert volume]([insert issue]), [insert page range].
+Philstar.com. (2025, [insert Month Day]). [insert news article title]. Philstar Global. [insert URL]
+Rahman, [insert initial]., [insert remaining co-authors' last names and initials]. (2022). [insert article title]. [insert journal name], [insert volume]([insert issue]), [insert page range].
+Safarov, [insert initial]., [insert remaining co-authors' last names and initials]. (2023). [insert article title]. [insert journal name], [insert volume]([insert issue]), [insert page range].
+Soukupová, T., & ?ech, J. (2016). Real-time eye blink detection using facial landmarks. 21st Computer Vision Winter Workshop (CVWW).
+Strayer, D. L., & McDonnell, [insert initial]. (2025). [insert article title]. [insert journal name], [insert volume]([insert issue]), [insert page range].
+Strayer, D. L., Fisher, D. L., & McCormack, S. P. (2015). [insert article title]. [insert journal name], [insert volume]([insert issue]), [insert page range].
+Tarun, [insert initial]., [insert remaining co-authors' last names and initials]. (2023). [insert article title]. [insert journal name], [insert volume]([insert issue]), [insert page range].
+UNESCO. (2024). Readiness assessment methodology (RAM) report for the Philippines. UNESCO. [insert URL if applicable]
+
+
+      College of Science and Computer Studies
+Computer Science Department                      
+
+2
+
+
+
+      College of Science and Computer Studies
+Computer Science Department                      
+
+
+
+
+      College of Science and Computer Studies
+Computer Science Department                      
+
+
+
+      College of Science and Computer Studies
+Computer Science Department                      
+
+
