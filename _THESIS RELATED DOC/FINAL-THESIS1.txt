@@ -1,0 +1,1699 @@
+College of Science and Computer Studies
+Computer Science Department
+
+GAZE: A CABIN-LEVEL EDGE ATTENTION AND RESPONSE
+SYSTEM FOR DRIVER FATIGUE AND DISTRACTION MONITORING
+IN THE PHILIPPINE GROUND LOGISTICS SECTOR
+
+Submitted in Partial Fulfillment
+Of the Requirement for the Degree
+Bachelor of Science in Computer Science with Intelligence Systems Track.
+
+Dalistan, Rona Margaret A.
+Abel, Mao Zeth A.
+Astrero, Jannbeau Amadeus Rain B.
+
+Kamantigue, Sheryl D.
+
+May 2026
+
+College of Science and Computer Studies
+Computer Science Department
+
+Table of Contents
+List of Figures .............................................................................................................................................................2
+CHAPTER I ......................................................................................................................................................................3
+INTRODUCTION .............................................................................................................................................................3
+1.1 Project Context ....................................................................................................................................................3
+1.2 Purpose and Description......................................................................................................................................5
+1.3 Statement of the Problem ...................................................................................................................................6
+1.4 Hypothesis ...........................................................................................................................................................7
+1.5 Research Objectives .............................................................................................................................................8
+1.6 Significance of the Study......................................................................................................................................9
+1.7 Scope and Limitations ........................................................................................................................................10
+CHAPTER II ...................................................................................................................................................................14
+REVIEW OF RELATED LITERATURE ...............................................................................................................................14
+2.1 Foreign Literature and Studies ..........................................................................................................................14
+2.2 Local Literature and Studies ..............................................................................................................................18
+2.3 Synthesis ............................................................................................................................................................22
+CHAPTER III ..................................................................................................................................................................24
+RESEARCH METHODOLOGY .........................................................................................................................................24
+3.1 Software Development Methodology ...............................................................................................................24
+3.1.1 Prototyping Model ......................................................................................................................................24
+3.2 Conceptual Framework ......................................................................................................................................29
+3.3 Algorithms .........................................................................................................................................................32
+3.3.1. Hybrid Perception Pipeline ........................................................................................................................32
+3.4 Operational Framework .....................................................................................................................................41
+3.5 Use Case / Flowchart / State Diagram ...............................................................................................................42
+3.5.1. Use Case.....................................................................................................................................................43
+3.5.2. Flowchart ...................................................................................................................................................45
+3.5.3 State Diagram .............................................................................................................................................47
+3.6 Respondents of the Study ..................................................................................................................................48
+3.6.1 Probability Sampling: Stratified Random Sampling ....................................................................................49
+3.6.2 Population and Strata .................................................................................................................................49
+3.6.3 Data Collection Instruments .......................................................................................................................50
+3.6.4 Data Analysis Methods ...............................................................................................................................50
+REFERENCES.............................................................................................................................................................53
+
+1
+
+College of Science and Computer Studies
+Computer Science Department
+
+List of Figures
+Figure
+
+Title
+
+Page
+
+1
+
+Figure of Prototyping Model
+
+25
+
+2
+
+Conceptual Framework Diagram
+
+29
+
+3
+
+Gaze Hybrid Pipeline Diagram
+
+32
+
+4
+
+Operational Framework Diagram
+
+41
+
+5
+
+Use Case Diagram
+
+43
+
+6
+
+Flowchart Diagram
+
+45
+
+7
+
+State Diagram
+
+47
+
+No.
+
+2
+
+College of Science and Computer Studies
+Computer Science Department
+
+CHAPTER I
+INTRODUCTION
+This chapter provides the foundational context for Gaze, an embedded driver monitoring
+system born out of a critical public safety need. It explores the human toll of driver fatigue, the
+growing technological divide in automotive safety, and the overarching mission to democratize lifesaving interventions for the everyday transport sector. Furthermore, this section outlines the
+specific problems the study aims to address, the objectives set by the researchers, and the scope
+within which the system will be developed.
+1.1 Project Context
+The global transportation network is sustained by the grueling labor of professional drivers,
+but this relentless pace has birthed a severe occupational and public safety crisis: driver fatigue
+and distraction. Drowsiness is widely recognized as a critical issue that impairs attentional control,
+decision-making ability, and reaction time, drastically increasing the risk and severity of road
+crashes (Fonseca & Ferreira, 2025). The human toll is staggering; global statistics from the AAA
+Foundation for Traffic Safety (2023) indicate that approximately 21% of fatal road accidents are
+linked to driver fatigue. To put this invisible threat into perspective, being awake for 18 to 24 hours
+results in a cognitive impairment comparable to a Blood Alcohol Concentration (BAC) of 0.05% to
+0.10%, drastically reducing reaction times (CDC, 2024).
+This risk is exponentially magnified for professional drivers in the commercial freight and
+public transportation sectors. Because these drivers are frequently subjected to intense
+workloads, irregular shift scheduling, and long hours, they inevitably face chronic fatigue and
+physical exhaustion (Peters et al., 2021). This exhaustion functions as a primary mediator that
+
+3
+
+College of Science and Computer Studies
+Computer Science Department
+
+translates high occupational stress directly into severe accident risks (Akkarasrisawad &
+Vanichkobchinda, 2025). Consequently, commercial and public utility drivers operating under
+these demanding conditions remain highly susceptible to drowsy driving, a leading cause of traffic
+crashes worldwide (Gao et al., 2024).
+To mitigate these systemic occupational hazards, the automotive industry and researchers
+have shifted towards advanced, real-time driver monitoring systems, moving away from traditional
+self-reported or vehicle-based metrics that lack the sensitivity for early warning (Fonseca &
+Ferreira, 2025). Modern solutions increasingly focus on non-intrusive computer vision and
+machine learning techniques to analyze a driver’s facial behavior directly (Bhasker et al., 2025).
+These systems monitor critical behavioral metrics, such as prolonged eyelid closure and yawning
+frequency, and estimate gaze direction to determine if a driver is distracted or failing to focus on
+the road (Bhasker et al., 2025; Pawar et al., 2025; Gao et al., 2024).
+However, a stark technological and economic divide exists. While advanced driverassistance systems (ADAS) are becoming standard in modern luxury vehicles, there is a significant
+gap in their accessibility for the average public transport operator, especially in developing regions.
+Many existing solutions are prohibitively expensive, require high-end proprietary hardware, or are
+overly intrusive, demanding wearable sensors that are impractical for daily use. Furthermore,
+systems relying on cloud computing are often rendered useless in areas with inconsistent mobile
+internet coverage. The drivers who work the longest hours and carry the most passengers are often
+the ones left unprotected.
+This creates an urgent need for an efficient, localized, and low-cost intervention that can
+be retrofitted into existing fleets. This research aims to address this critical gap by developing Gaze,
+
+4
+
+College of Science and Computer Studies
+Computer Science Department
+
+a computer vision-based monitoring system optimized for embedded edge devices. By
+democratizing lightweight facial landmark detection, Gaze operates independently without the
+need for constant cloud connectivity or high-power computing. The system acts as a localized,
+vigilant safeguard, providing immediate audible feedback to drivers the moment signs of fatigue or
+visual distraction are detected. Ultimately, Gaze seeks to foster a safer driving environment,
+protecting the livelihoods of overworked drivers and the lives of the millions of commuters who rely
+on them.
+1.2 Purpose and Description
+Every day, millions of commuters and tons of essential freight are entrusted to drivers
+navigating exhausting, repetitive routes, often in older vehicles entirely devoid of modern safety
+nets. In the quiet, isolated hours of a long haul or the monotonous, draining crawl of daily traffic,
+a driver’s only defense against creeping fatigue is their own fading willpower.
+
+When
+
+an
+
+overworked public utility driver or commercial trucker is alone in the cabin, a single micro-sleep
+or momentary distraction can be fatal. The primary purpose of Gaze is to intervene in this exact
+vulnerability. It is designed to act as an artificial co-pilot for the everyday transport sector, a
+localized safeguard that standardizes road safety by bringing high-end, life-saving intervention
+to the vehicles and drivers that need it most.
+Rather than relying on a complex array of intrusive sensors or expensive infrastructure,
+Gaze is conceptualized as a silent, intelligent observer. Housed in a compact, dashcam-sized
+unit, the system continuously reads the subtle human cues that precede a disaster: the
+
+5
+
+College of Science and Computer Studies
+Computer Science Department
+
+prolonged blink, the drooping eyelids, or a gaze that drifts away from the road for just a second
+too long.
+Crucially, the system is designed around the harsh realities of local driving
+environments. Because professional drivers frequently traverse provincial routes, rural
+highways, or infrastructure "dead zones" with highly unreliable internet, Gaze operates entirely
+independent of the cloud. It processes every behavioral cue and micro-movement directly
+within the vehicle itself. This localized, edge-computing approach ensures that the moment a
+driver slips into a dangerous state of inattention, the system does not waste precious time
+communicating with a remote server. Instead, it instantly triggers a sharp, distinct audible
+warning, delivering a critical intervention in mere milliseconds to snap the driver’s attention
+back to the road.
+Ultimately, Gaze is more than just a combination of cameras and algorithms; it is a
+proactive shield built for the real-world conditions of commercial and public operators. By
+offering a low-cost, highly responsive, and privacy-respecting alternative to proprietary
+automotive technologies, Gaze seeks to prevent the devastating ripple effects of traffic
+collisions, ensuring that overworked drivers can safely finish their routes and return home to
+their families.
+1.3 Statement of the Problem
+At the heart of this research is a critical safety and economic deadlock: while driver fatigue
+and visual distraction continue to be leading catalysts for fatal road accidents, the technology
+capable of preventing these tragedies remains structurally and financially out of reach for the
+
+6
+
+College of Science and Computer Studies
+Computer Science Department
+
+everyday transport sector. Therefore, the central problem this study seeks to solve is how to
+engineer an accessible, accurate, and localized driver monitoring.
+Specifically, this study attempts to answer the following research questions:
+1. How can a computer vision model be optimized for an embedded system to achieve 90%
+accuracy in detecting driver distraction and fatigue?
+2. What is the optimal temporal threshold between the deep learning model detecting an
+impaired state (e.g., Yawning, Eyes Off-Road) and the execution of the hardware alert to
+minimize false positives while maintaining safety?
+3. How does the system’s performance (accuracy and latency) degrade in varied lighting
+conditions, such as bright daylight versus overcast scenarios?
+4. How reliably can the Gaze system maintain its targeted 1.5 to 2.0-second temporal
+threshold for issuing hardware alerts during continuous monitoring without performance
+degradation?
+5. What is the level of user acceptability and usability of an audible alert system for
+professional drivers according to ISO 25010 standards?
+1.4 Hypothesis
+This study aims to prove the viability of deploying complex sequential neural networks
+on resource-constrained edge devices. The evaluation of the Gaze system is guided by the
+following specific hypotheses:
+
+7
+
+College of Science and Computer Studies
+Computer Science Department
+
+Hypothesis 1: On Detection Accuracy and Robustness
+•
+
+Null Hypothesis (H₀): The edge-deployed DMD model will not achieve a statistically
+significant detection accuracy of 90% or higher in classifying driver fatigue and visual
+distraction across varied cabin lighting conditions.
+
+•
+
+Alternative Hypothesis (Hₐ): The edge-deployed DMD model will achieve a
+minimum detection accuracy of 90% in classifying driver fatigue and visual
+distraction, demonstrating robustness across varied cabin lighting conditions.
+
+Hypothesis 2: User Feedback
+•
+
+Null Hypothesis (H₀₂): The Gaze system does not receive a statistically significant
+positive user feedback rating (usability and safety perception) from the respondents.
+
+•
+
+Alternative Hypothesis (Hₐ₂): The Gaze system receives a statistically significant
+positive user feedback rating (usability and safety perception) from the respondents.
+
+1.5 Research Objectives
+This study aims to design, develop, and evaluate a real-time monitoring system that
+effectively detects driver distraction and provides immediate notifications to mitigate road risks.
+1.5.1 General Objective
+To design and develop Gaze: A Cabin-Level Edge Attention and Response System
+for Driver Fatigue and Distraction Monitoring.
+1.5.2 Specific Objectives
+
+8
+
+College of Science and Computer Studies
+Computer Science Department
+
+1. To design and develop a computer vision model utilizing MediaPipe and
+OpenCV capable of detecting driver eye movements and gaze direction in
+real-time.
+2. To determine and implement temporal distraction thresholds based on
+geometric gaze deviations to accurately identify 'eyes-off-road' events.
+3. To develop a real-time alert mechanism that produces a distinct audible
+warning when the distraction threshold is exceeded, ensuring minimal
+system latency.
+4. To integrate the monitoring system into a dashcam-based embedded
+platform (Raspberry Pi 5) for on-device processing.
+5. To evaluate the system's effectiveness and usability by conducting field tests
+with licensed drivers, measuring detection accuracy, response time, and user
+satisfaction through ISO 25010 metrics.
+
+1.6 Significance of the Study
+The findings of this research are expected to provide significant benefits to various
+stakeholders in the transport and safety communities:
+•
+
+Professional Drivers (Freight & Public Transit): Acts as a real-time, localized
+safeguard that protects overworked commercial drivers from the life-threatening
+risks of chronic fatigue, sleepiness, and distractions.
+
+•
+
+Fleet Operators and Transport Agencies: Provides a highly affordable, scalable
+alternative to expensive proprietary safety systems, allowing local logistics
+
+9
+
+College of Science and Computer Studies
+Computer Science Department
+
+companies and public utility operators to easily retrofit their vehicles and better
+protect their drivers.
+•
+
+The General Public: Enhances overall road safety for commuters and
+pedestrians by proactively preventing heavy-vehicle and public transport
+collisions caused by driver inattention.
+
+•
+
+Vehicle Safety Technology Developers: Serves as a proof-of-concept for the
+viability of edge-based AI in automotive safety, proving that high-accuracy
+monitoring can be achieved with constrained hardware.
+
+•
+
+Future Researchers: Establishes a technical baseline for deploying advanced,
+lightweight computer vision safety models on edge devices without cellular
+connectivity, contributing to the body of knowledge in Affective Computing and
+AI-driven safety solutions.
+
+1.7 Scope and Limitations
+This section delineates the specific boundaries and practical constraints of the research to
+ensure a focused, safe, and feasible evaluation of the Gaze system. The project is firmly anchored
+in the local commercial transport sector of the CALABARZON region in the Philippines and will be
+conducted in collaboration with a partnering local transport or logistics company. To guarantee
+that the system is evaluated by its intended users, the study involves a minimum of 50-100 hours
+of on-road pilot test, strictly limited to individuals holding valid professional driver's licenses who
+actively operate heavy commercial or public utility vehicles.
+
+10
+
+College of Science and Computer Studies
+Computer Science Department
+
+Over a continuous period of approximately two months, the researchers will deploy one to
+three fully functioning hardware prototypes to gather comprehensive baseline data on driver
+behavior, specifically targeting the accurate detection of "eyes-off-road" visual distraction and
+physiological drowsiness.
+Crucially, the empirical evaluation of the Gaze system is divided into two distinct phases to
+balance participant safety with ecological validity. The initial data collection and baseline
+calibration phase will be conducted within stationary heavy vehicles. This controlled environment
+allows the researchers to safely and accurately establish threshold sensitivities without
+introducing active collision risks. However, to fully validate the system's practical effectiveness,
+the operational prototype testing will subsequently be conducted in moving vehicles. This inmotion testing is essential to ensure the hybrid perception pipeline remains robust against the
+dynamic realities of the Philippine driving environment, specifically accounting for operational
+variables such as fluctuating ambient lighting, harsh glare, and camera vibrations induced by local
+road conditions.
+To prioritize driver safety and control for external environmental factors, the data collection
+is structured into two distinct stages: Phase 1 (Stationary Evaluation) and Phase 2 (Dynamic OnRoad Testing). A strict safety protocol is implemented wherein progression to Phase 2 is entirely
+contingent upon the prototype demonstrating reliable performance during the stationary phase; if
+the system fails to perform accurately in Phase 1, dynamic testing will not proceed. Furthermore,
+to eliminate the complex visual variables associated with low-light environments such as sudden
+illumination shifts from streetlights or glare from passing vehicle headlights; all field testing is
+strictly delimited to daytime hours, excluding nighttime evaluation. Additionally, due to the
+
+11
+
+College of Science and Computer Studies
+Computer Science Department
+
+significant financial constraints associated with component procurement and prototype
+fabrication, the hardware deployment is restricted to a maximum of three devices. Because of this
+limited scale, the study focuses solely on evaluating localized device efficacy and does not
+encompass the logistical or infrastructural challenges of a fleet-wide commercial rollout.
+Technologically, Gaze is engineered strictly as an internal, localized edge device. Its sole
+mandate is immediate, in-cabin accident prevention; therefore, it does not support cloud-based
+data synchronization, nor will it generate longitudinal reports tracking the drivers' long-term
+behavioral habits over the two-month period. The system also strictly omits any Advanced Driver
+Assistance Systems (ADAS) features for external road hazard detection, such as lane departure or
+forward collision warnings.
+While the system’s infrared capabilities are designed to accurately map facial features
+even when standard prescription eyewear is used, its detection accuracy may naturally be
+hindered by extreme physical variables, such as drivers wearing heavily tinted sunglasses, thick
+face masks, or other accessories that cause severe facial occlusion.
+Finally, the decision to bound the study by a time-delimited scope (50 to 100 hours) rather
+than a traditional participant headcount was driven by strict logistical, temporal, and material
+constraints. Recruiting, scheduling, and coordinating up to 100 distinct professional drivers within
+a single partner organization is logistically unfeasible and would cause severe disruptions to their
+commercial operations. Furthermore, the testing phase is bounded by a strict research timeline
+and significant hardware limitations, specifically the restricted number of physical prototype
+devices available for deployment. Because of this limited scale, the study focuses solely on
+
+12
+
+College of Science and Computer Studies
+Computer Science Department
+
+evaluating localized device efficacy over sustained driving periods, rather than the logistical
+challenges of a fleet-wide commercial rollout.
+
+13
+
+College of Science and Computer Studies
+Computer Science Department
+
+CHAPTER II
+REVIEW OF RELATED LITERATURE
+This chapter provides an extensive review of literature and studies that establish the
+technical and conceptual framework for Gaze. The discussion is divided into two main sections:
+Foreign Literature and Studies, and Local Literature and Studies, focusing on the intersection of
+Affective Computing, Computer Vision, and Embedded Systems. Finally, a synthesis of the
+reviewed materials is provided at the end of the chapter to definitively establish the research gap
+that this study aims to bridge.
+2.1 Foreign Literature and Studies
+Fundamentally, the complex coordination of sensory and cognitive functions required for
+safe driving begins with human biology, a concept analyzed by Anderson et al. (2021) in the
+Handbook of Clinical Neurology. Their research evaluates how selective pathophysiologic insults
+to "driving-critical systems," specifically vision and attention, place various populations at a higher
+risk for unsafe driving. Establishing a significant relationship between impaired visual perception
+and diminished attentional capacity, the authors note that impairment in one system often
+correlates with deficits in the other. From a neurological perspective, this confirms that vision and
+attention are the absolute pillars of driver fitness (Anderson et al., 2021), reinforcing the premise
+that monitoring a driver's visual state is the most direct method for identifying cognitive risks on the
+road.
+Translating this biological reality into behavioral driving models, the foundational theory of
+visual attention is explored through the SPIDER (Scanning, Predicting, Identification, Decisionmaking, and Executing a Response) model, as updated by Strayer et al. (2025). Their literature
+
+14
+
+College of Science and Computer Studies
+Computer Science Department
+
+emphasizes that driving is a multisensory experience where visual scanning is paramount for
+maintaining situational awareness. The researchers argue that multitasking significantly degrades
+a driver’s capacity to process vital environmental information, leading to the dangerous
+phenomenon of "inattentional blindness," where a distracted driver may completely fail to notice
+critical information directly in their line of sight. This theoretical framework underscores the
+necessity of continuous monitoring to prevent the severe cognitive lapses identified in the SPIDER
+model.
+To combat these cognitive lapses, modern safety paradigms have shifted from reactive to
+proactive management, a transition analyzed in the i-DREAMS Policy Brief (2023). Culminating a
+four-year European Union research initiative, the report introduces a monitoring solution that
+moves beyond traditional "blame-it-on-the-driver" mentalities. Instead, it evaluates a "safety
+tolerance zone" by measuring driving parameters alongside driver characteristics, specifically
+sleepiness and visual distraction. A key finding of the project (i-DREAMS, 2023) is that effective
+monitoring must account for external contexts to provide instant, proactive recommendations,
+highlighting the importance of an architecture that uses real-time alerts to coach drivers rather than
+simply logging their errors after an accident occurs.
+Recognizing the life-saving potential of these proactive systems, the global regulatory
+framework has been significantly redefined by Regulation (EU) 2019/2144 of the European
+Parliament and of the Council. This regulation legally mandates the integration of advanced driver
+drowsiness and attention warnings in modern vehicles to mitigate human error. Crucially, Recital
+(10) states that these systems must function effectively without retaining biometric information,
+strictly adhering to principles of privacy. Furthermore, Recital (14) specifies that monitoring should
+
+15
+
+College of Science and Computer Studies
+Computer Science Department
+
+operate within a closed-loop system, ensuring data is not continuously recorded beyond the
+immediate purpose of alerting the driver. This legislative mandate confirms that real-time, privacyconscious monitoring is now a universal standard for automotive safety.
+Commercially, the industry is rapidly adapting to these mandates. A global market analysis
+by Future Market Insights (2026) indicates that the Driver Monitoring Systems (DMS) industry is
+projected to reach a market value of USD 5.7 billion, growing at a CAGR of 8.1% toward USD 12.4
+billion by 2036. Notably, the report identifies Camera-Based Systems as the dominant technology
+segment, capturing a 48% share of the market compared to sensor fusion platforms. Nikhil
+Kaitwade, Principal Consultant at FMI, emphasizes that minimizing high false-positive rates is
+critical for market acceptance among privacy-conscious consumers. These strategic implications
+highlight a global shift toward non-intrusive, camera-based solutions that prioritize high-fidelity
+detection and real-time processing.
+Technically, the practical integration of these camera-based techniques relies heavily on
+geometric facial analysis, as evaluated by Safarov et al. (2023) in their investigation into real-time
+drowsiness detection. The researchers utilized an eye-blink analysis approach, leveraging
+landmarks to obtain precise coordinates for the eye and mouth regions. By analyzing blinking rates
+and mouth shape fluctuations, the study established a clear correlation between yawning and
+prolonged eyelid closure as primary indicators of a drowsy state. Achieving a 95.8% accuracy for
+drowsy-eye detection using a threshold-based classification system, their findings confirm that
+analyzing geometric landmarks provides a robust, real-time framework for identifying physiological
+fatigue.
+
+16
+
+College of Science and Computer Studies
+Computer Science Department
+
+To extract these complex geometric landmarks accurately, highly precise tracking
+frameworks are required, a capability demonstrated in a comprehensive study by Chandwani et al.
+(2023) regarding sign language recognition. The researchers employed the MediaPipe tracking
+technique in conjunction with a gesture classification model to recognize complex visual patterns.
+Achieving a significant classification accuracy of approximately 99 percent across metrics such as
+Recall, F1 Score, and Precision, this research highlights the high generalization qualities of
+MediaPipe. For vision-oriented applications, the study validates MediaPipe as a highly robust tool
+for translating physical movements into the verifiable data points needed for behavioral
+assessment.
+However, real-world monitoring environments introduce physical variables that algorithms
+must overcome. The robustness of detection models against such variations is explored by
+Rahman et al. (2023) through the introduction of the Synthetic Distracted Driving (SynDD2)
+dataset. Capturing distracted behaviors across multiple in-vehicle camera perspectives, the study
+specifically included activities involving appearance blocks, such as the wearing of hats or
+sunglasses, to test the limits of machine learning algorithms. By providing standardized data for
+randomized activities, the research (Rahman et al., 2023) underscores the absolute necessity of
+accounting for physical obstructions and varied camera angles to ensure system resilience in realworld driving scenarios.
+Processing such complex visual variations requires highly optimized algorithms, a
+necessity examined by Lei et al. (2025) in their development of an intelligent network framework.
+Proposing the RES-SE-CNN model, which integrates an attention mechanism into a Residual
+Network architecture, the researchers achieved a superior recognition rate of 97.28% against
+
+17
+
+College of Science and Computer Studies
+Computer Science Department
+
+classical models like VGG19 and ResNet50. Crucially, the study notes that this optimized
+architecture is characterized by lower memory occupancy, rendering it highly amenable to
+deployment on vehicle mobile terminals. These findings provide a strong justification for utilizing
+lightweight, attention-based models to maintain high detection accuracy on hardware with
+constrained computational limits.
+Ultimately, deploying these optimized models directly inside the vehicle represents a
+systemic architectural shift, comprehensively analyzed by Abou Ali et al. (2025) in their review of
+Edge Artificial Intelligence. Examining the transition from cloud-dependent computing to modern
+on-device processing, the researchers highlight that embedding intelligence directly into edge
+devices enables real-time processing with significantly reduced latency. Furthermore, it inherently
+improves privacy by processing data close to its source (Abou Ali et al., 2025). This systematic
+review provides the ultimate theoretical foundation for localized hardware deployment, ensuring
+that life-saving monitoring systems remain completely functional without relying on external
+internet connectivity.
+2.2 Local Literature and Studies
+In the Philippine context, the necessity for such life-saving technology is underscored by a
+critical nationwide safety crisis, as quantified in the Philippines Road Safety Profile 2025 (Asian
+Transport Observatory, 2025). Identifying road crashes as a massive socio-economic burden, the
+report notes that fatalities and injuries cost the economy an estimated USD 11 billion in 2021,
+roughly 3% of the national GDP. Despite targets set in the Philippine Road Safety Action Plan 20232028, the country’s progress severely lags behind regional peers, experiencing only a -4.7% annual
+
+18
+
+College of Science and Computer Studies
+Computer Science Department
+
+decrease in deaths. This data vividly highlights the urgency for aggressive technological innovations
+to bridge the gap between policy ambitions and actual survival rates on the road.
+Compounding this crisis is the perilous state of the country's physical infrastructure. Data
+from the International Road Assessment Programme (iRAP, 2025) reveals that only 5% of
+Philippine roads achieve a 3-star or better rating for pedestrians, while motorcyclists face similarly
+hazardous conditions. With an alarming rate of 36 fatalities per thousand kilometers of road, the
+complexity of the local road environment is characterized by rapid motorization and highly
+vulnerable users. This infrastructural deficit suggests that relying on road improvements alone is
+insufficient, creating a dire need for vehicle-based safety technologies that provide drivers with
+real-time awareness to navigate these high-risk corridors.
+Within this dangerous environment, specific human errors act as the primary catalysts for
+disaster, a relationship examined by Castilla et al. (2023) from the Cebu Technological UniversityDanao Campus. Investigating public utility drivers at the Danao City terminal, the researchers
+found that while cognitive distractions had minimal effects, manual and visual distractions were
+the overwhelming causes of local road incidents. The study uncovered that even rare occurrences
+of drivers taking their eyes off the road significantly correlated with accident encounters, providing
+an empirical basis for prioritizing visual monitoring to protect the local public transport sector.
+This assessment is strongly corroborated by a foundational study from the University of
+Mindanao. Osorio, Montano, Apuya, and Gempesao (2025) investigated the relationship between
+driver behavior and safety practices among 300 commuters in Davao City. Utilizing the Road Safety
+Perception Questionnaire (RSPQ), the researchers identified a significant correlation between
+"risky driving behaviors" such as impatient overtaking and momentary lapses in attention and
+
+19
+
+College of Science and Computer Studies
+Computer Science Department
+
+severe safety outcomes. Emphasizing a critical need for enhanced monitoring to curb these
+violations, the research provides a direct statistical justification for implementing real-time
+systems to correct the risky behaviors pervasive among local road users.
+Understanding why these risky behaviors occur requires examining the grueling realities of
+the local transport sector. The Public Utility Vehicle Modernization Program (PUVMP), detailed in
+the Jeepney+ NAMA framework (DOTr & GIZ, 2016), aims to replace aging fleets with safer
+alternatives. However, while aiming for modernization, the transition toward formalized shiftpatterns has drastically increased vehicle operating hours from 14 to up to 19 hours per day (GIZ,
+2021). This operational reality forces drivers to push their physical limits, underscoring the
+necessity for technological interventions capable of monitoring extreme exhaustion during these
+extended shifts.
+Despite the clear need to protect exhausted drivers, economic constraints create a
+massive barrier to adoption. A report from Philstar.com (2025) details the Department of
+Transportation's push for PUV consolidation, a mandate that has faced severe pushback from
+transport groups like Piston and Manibela due to the crippling financial burden it places on smallscale operators. This highlights a distinct "safety and economic deadlock" in the Philippines: while
+operators desperately need modern safety systems, they absolutely require low-cost, nonproprietary solutions that can be integrated without causing operational bankruptcy.
+Furthermore, even if operators could afford advanced cloud-based safety systems, the
+local digital infrastructure cannot support them. The Digital Cities 2025 Location Primer (2020),
+published by the Department of Information and Communications Technology (DICT), highlights
+massive disparities in telecommunications capacity outside of Metro Manila. The DICT framework
+
+20
+
+College of Science and Computer Studies
+Computer Science Department
+
+confirms that highly inconsistent connectivity necessitates localized digital solutions. This
+government roadmap validates the absolute necessity of "Edge Computing" for local transport;
+safety systems must process data entirely within the vehicle to remain functional across provincial
+dead zones.
+Beyond infrastructure, there is also a deep-seated cultural barrier regarding data privacy.
+According to the UNESCO Readiness Assessment Methodology (RAM) Report for the Philippines
+(2024), the country faces significant public skepticism regarding artificial intelligence. The report
+highlights a prevailing "anxiety" among Filipinos concerning AI-enabled tools, fueled by a lack of
+trust in data retention and privacy frameworks. By advocating for ethics as a defining hallmark of AI
+deployment, the UNESCO findings provide a strong socio-technical justification for an edge-based
+architecture, a system that processes facial data instantly without ever saving or uploading it to the
+cloud.
+Proving that this localized, edge-computing approach is highly viable in the Philippines,
+Tarun et al. (2023) from Ateneo de Manila University deployed vision-based detection models on
+embedded hardware. Testing YOLOv5 on a resource-constrained Raspberry Pi 4 Model B, the
+researchers achieved an impressive classification accuracy of 95%. While noting that inference
+speeds were lower than desktop computers, the model successfully processed images
+dynamically without external servers. These findings serve as a vital technical proof of concept,
+confirming that affordable Raspberry Pi devices can effectively shoulder the computational weight
+of local monitoring tasks.
+Building on this hardware viability, the robustness of embedded systems under challenging
+local environmental conditions was demonstrated by Bermoy and Sanchez (2025) at the Philippine
+
+21
+
+College of Science and Computer Studies
+Computer Science Department
+
+Science High School. Proposing a hybrid driver distraction system, they deployed a landmarkbased gaze estimation framework on a newer Raspberry Pi 5. Validating the system's resilience, it
+achieved an overall accuracy of 95.2% despite intense tropical daylight, dim nighttime illumination,
+and the presence of prescription eyewear. This confirms that landmark-based edge computing is
+highly capable of maintaining accuracy across the diverse and challenging lighting conditions
+characteristic of the Philippines.
+Finally, the ability to translate this localized detection into immediate, life-saving action is
+showcased by Boon et al. (2026) through "Lumina Alert." Tested on a Toyota Avanza and powered
+by edge computing, the system monitored facial drowsiness indicators to trigger multi-modal
+interventions, including a 7-millisecond auditory alert and an ignition lockout mechanism.
+Achieving a 93.1% detection accuracy, the system successfully prevented vehicle operation in
+95% of drowsy cases. For the current research, this provides the ultimate benchmark, proving that
+affordable, localized edge AI can completely bridge the gap between behavioral detection and
+physical accident prevention on Philippine roads.
+2.3 Synthesis
+The extensive review of literature highlights a clear consensus: the biological imperative of
+driver attention is best safeguarded by the rapid advancement of non-intrusive, AI-driven camera
+monitoring. Globally, these systems have become the legislative and commercial standard for
+proactive road safety. Locally, the staggering socio-economic cost of traffic fatalities,
+compounded by the grueling, 19-hour shifts demanded within the Philippine public transport
+sector, underscores a life-or-death need for these exact interventions. Concurrently, technical
+studies validate that standalone edge computing, specifically localized architectures like the
+
+22
+
+College of Science and Computer Studies
+Computer Science Department
+
+Raspberry Pi utilizing geometric facial tracking, is highly capable of processing complex visual data
+in real-time. The science, legislation, and foundational hardware all point toward an accessible
+future for automated driver safety.
+However, a critical socio-technological gap renders existing global solutions ineffective in
+the Philippine context due to severe demographic and environmental training biases.
+Commercially available algorithms are overwhelmingly calibrated using Western data, optimizing
+their predictive models for Caucasian ocular morphology and well-lit, highly structured, multi-lane
+highway environments. When these systems are deployed against the distinct facial geometries of
+Southeast Asian drivers navigating the chaotic, poorly illuminated, and unpredictable realities of
+Philippine provincial roads and dense urban traffic, their tracking accuracy degrades, yielding
+dangerous false negatives. Furthermore, these proprietary systems typically demand robust cloud
+connectivity, rendering them functionally useless in local rural "dead zones." Gaze directly
+addresses this gap. By synthesizing a standalone Raspberry Pi 5 edge architecture with a hybrid
+perception algorithm specifically optimized for Filipino facial parameters and harsh local driving
+environments, Gaze bypasses the geographic biases of commercial models, placing reliable, lifesaving technology directly into the cabins of overworked local drivers.
+
+23
+
+College of Science and Computer Studies
+Computer Science Department
+
+CHAPTER III
+RESEARCH METHODOLOGY
+This chapter details the technical and methodological processes used to design, develop,
+and evaluate Gaze. The discussion outlines the software development methodology, conceptual
+and operational frameworks, core algorithms and mathematical formulas, system flow diagrams,
+and the specific respondents selected for field testing.
+3.1 Software Development Methodology
+3.1.1 Prototyping Model
+The researchers employed the Prototyping Model as the primary software development life
+cycle (SDLC) for the engineering of the GAZE system. Given the hybrid nature of the architecture,
+fusing a high-fidelity geometric landmark extractor with a lightweight neural gaze classifier and
+rule-based drowsiness detector, an iterative approach was strictly necessary. Unlike rigid linear
+frameworks, the Prototyping Model allowed the development team to progressively validate each
+component under the real-time latency budget of the target Raspberry Pi 5 before integrating the
+next layer.
+
+24
+
+College of Science and Computer Studies
+Computer Science Department
+
+3.1.1.1 Figure of Prototyping Model
+
+25
+
+College of Science and Computer Studies
+Computer Science Department
+
+1. Requirement Analysis
+For the initial requirements phase, the researchers established the operational
+boundaries for a hybrid detection system tailored for the Philippine logistics sector. The
+proponents defined the Raspberry Pi 5 as the target hardware platform, providing adequate
+ARM-NEON vectorization for the MediaPipe inference workload. The team identified the
+Driver Monitoring Dataset (DMD) as the primary training source: a large-scale, subjectlabelled gaze dataset recorded inside an instrumented vehicle cabin with a frontal RGB
+camera. Hardware requirements remained focused on offline reliability, utilizing a
+compatible camera module and an active 5V piezo buzzer for the localized audible
+intervention.
+2. Quick Design
+Following the establishment of hardware constraints, the team developed a
+structural blueprint for the system's perception-to-decision logic flow. This phase focused
+on a modular design across dedicated Python sub-packages: one for leakage-free subjectdisjoint data splits, one for model training and evaluation, and one for live edge execution.
+The design prioritized a clean separation between the learned gaze classifier and the rulebased drowsiness detector so that each component could be tuned and evaluated
+independently.
+3. Cross-Platform Prototyping
+To ensure high accuracy before introducing hardware limitations, the machine
+learning pipeline was developed and benchmarked on a high-performance GPU
+workstation. The researchers designed a compact Multi-Layer Perceptron (GazeMLP) to
+
+26
+
+College of Science and Computer Studies
+Computer Science Department
+
+classify gaze zone directly from a 20-dimensional geometric feature vector extracted by
+MediaPipe FaceLandmarker. This approach deliberately avoids processing raw pixels: the
+feature vector encodes head rotation, normalized iris position, and eye-direction
+blendshape activations, representations that are invariant to frame translation, scale, and
+moderate camera placement variation. The model is trained on labelled frames from the
+Driver Monitoring Dataset using a subject-disjoint held-out split, and the entire training
+run completes in under 10 seconds on the development workstation, enabling rapid
+ablation experiments.
+4. Hardware Migration
+Once the GazeMLP was validated, it was exported to the Open Neural Network
+Exchange (ONNX) format using a normalization wrapper that bakes the training-set mean
+and standard deviation into the model graph. This single-file artefact is loaded on the
+Raspberry Pi via the ONNX Runtime CPU execution provider with two intra-operation
+threads. MediaPipe's built-in facial transformation matrix provides a numerically stable
+head rotation directly from the landmark solve, eliminating the need for a separate
+cv2.solvePnP call and its associated jitter. The complete per-frame pipeline (capture,
+MediaPipe, feature construction, EMA, ONNX inference) targets a total latency of ≤ 50 ms
+on the Pi 5.
+5. Refinement
+With the system executing on the Raspberry Pi 5, the team engaged in continuous
+refinement to stabilize real-world performance. The researchers implemented Exponential
+
+27
+
+College of Science and Computer Studies
+Computer Science Department
+
+Moving Average (EMA, a = 0.3) smoothing on the 20-D feature vector to suppress singleframe landmark jitter without introducing the phase lag of a long rolling window. A crucial
+addition was per-driver calibration. Recognizing that individual variation in head posture
+and resting eye position creates a systematic offset between a driver's feature distribution
+and the DMD training population, the system captures a 5-second neutral-pose window at
+session start. The mean feature vector during this window defines the user's frontal
+reference; a population-level frontal mean computed from the training set serves as the
+anchor. The difference is subtracted from every subsequent feature vector, aligning the
+driver's feature space to the training distribution (Fridman et al., 2018).
+6. Final Product
+The culmination of the iterative cycle resulted in a standalone Gaze Prototype. The
+finalized system operates as a unified perception loop, achieving a latency target of ≤ 50ms
+per frame while simultaneously classifying gaze zone and monitoring physiological
+drowsiness signals. Powered by a 5V 3A source, the system is fully vehicular-mobile and
+ready for empirical validation with licensed professional drivers.
+
+28
+
+College of Science and Computer Studies
+Computer Science Department
+
+3.2 Conceptual Framework
+Figure 3.2.1 Conceptual Framework Diagram
+
+29
+
+College of Science and Computer Studies
+Computer Science Department
+
+The conceptual framework of Gaze delineates the systematic progression from theoretical
+problem identification to physical technological intervention. Grounded in the problem domain of
+driver fatigue and visual distraction, the framework integrates the SPIDER (Scanning, Predicting,
+Identifying, Decision-making, and Executing a Response) model of visual attention (Strayer et al.,
+2025) as the theoretical basis for defining which gaze zones constitute an attentive state.
+The Input Layer relies on localized edge computing paired with a live RGB camera feed and
+the Driver Monitoring Dataset (DMD) as the training corpus. The input stage also incorporates persession personalization through a 5-second neutral-pose calibration window that corrects for
+individual variation in head posture and resting iris position.
+The Process Layer functions as a hybrid perception engine. A single MediaPipe
+FaceLandmarker pass per frame produces 478 normalized 3D landmarks, 52 facial blendshape
+activations, and a 4×4 facial transformation matrix (Lugaresi et al., 2019). These outputs feed two
+parallel paths. Path A constructs a compact 20-dimensional geometric feature vector from the
+rotation matrix and iris positions, applies the calibration offset and EMA smoothing, and classifies
+the result with the GazeMLP neural network into one of nine gaze zones. Path B evaluates three
+specific blendshape activations: mean eyelid closure, jaw opening, and the Percentage of Eye
+Closure (PERCLOS) over a 60-second window against fixed thresholds to detect microsleep,
+yawning, and sustained drowsiness. These paths converge at a signal fusion step which evaluates
+all active conditions against temporal hysteresis requirements before issuing an alert decision,
+consistent with the 1.5-second eyes-off-road criterion documented in automotive safety literature
+(Klauer et al., 2006).
+
+30
+
+College of Science and Computer Studies
+Computer Science Department
+
+The Output Layer transforms the processed signals into tangible interventions. Normal
+states continue monitoring; threshold breaches trigger the 5V piezo buzzer and on-screen HUD
+alerts. A session metrics log captures latency figures, event counts, PERCLOS values, and blink
+rate for offline analysis without cloud connectivity.
+
+31
+
+College of Science and Computer Studies
+Computer Science Department
+
+3.3 Algorithms
+3.3.1. Hybrid Perception Pipeline
+3.3.1.1. Gaze Hybrid Pipeline Diagram
+
+32
+
+College of Science and Computer Studies
+Computer Science Department
+
+The GAZE application utilizes a hybrid perception pipeline that transforms raw video frames
+into actionable safety alerts. Rather than processing raw pixel textures through a large
+convolutional network, the pipeline delegates the computationally intensive landmark solve to
+MediaPipe FaceLandmarker and reduces the downstream classification problem to a 20dimensional geometric vector. This decomposition yields a classifier small enough to run at submillisecond latency on the Raspberry Pi 5 while retaining the generalization benefits of a learned
+model (Howard et al., 2019).
+Each frame is captured from the camera and passed as an RGB image to MediaPipe
+FaceLandmarker operating in VIDEO mode. A single inference call returns 478 normalized 3D
+landmarks, 52 facial blendshape activations, and a 4×4 facial transformation matrix encoding the
+head pose relative to the camera frame (Lugaresi et al., 2019). The pipeline then diverges into two
+parallel paths.
+1. PATH A: GAZE CLASSIFICATION (Learned)
+A 20-dimensional feature vector is assembled from three sources: (i) the 6D
+rotation representation extracted from the transformation matrix's upper-left 3×3 rotation
+block; (ii) four iris-relative gaze scalars normalized per eye to the eye-corner span; and (iii)
+ten eye-direction blendshape activations. The vector is corrected by subtracting the peruser calibration offset and then smoothed with an Exponential Moving Average filter. The
+corrected, smoothed vector is fed to the GazeMLP, a two-hidden-layer MLP of ~6,000
+parameters, which outputs a softmax probability distribution over nine gaze zones. The
+predicted zone with the highest probability is evaluated by a hysteresis counter: a sustained
+
+33
+
+College of Science and Computer Studies
+Computer Science Department
+
+off-road prediction for 45 consecutive frames (1.5 seconds at 30 fps) triggers the
+distraction alert.
+2. PATH B: DROWSINESS DETECTION (Rule-Based)
+Three blendshape activations are extracted from the same MediaPipe pass:
+eyeBlinkLeft, eyeBlinkRight, and jawOpen. These are evaluated against fixed thresholds in
+independent hysteresis counters:
+•
+
+Microsleep: mean eyelid-closure blendshape > 0.5 for ≥ 12 frames
+
+•
+
+Yawn: jawOpen > 0.5 for ≥ 45 frames
+
+•
+
+PERCLOS: fraction of frames with mean closure > 0.5 over a trailing 60-second window
+exceeds 0.20
+
+Both paths converge at the signal fusion stage, which evaluates all active alert conditions
+and triggers the hardware intervention if any threshold has been breached.
+Steps in Algorithm:
+1. Capture BGR frame from the camera feed.
+2. Convert BGR to RGB; pass to MediaPipe FaceLandmarker (VIDEO mode).
+3. If no face detected: reset EMA; return STATE_FACE_LOST.
+4. Extract head rotation matrix 𝑅(3 × 3) from the facial transformation matrix.
+5. Extract 6D rotation: 𝑟6 = [𝑅:,0 ; 𝑅:,1 ] (first two columns).
+6. Extract iris centroid positions for both eyes; compute normalized gaze vectors relative to the
+respective eye-corner span.
+7. Extract the 10 configured eye-direction blendshape activations.
+8. Concatenate: 𝑣 = [𝑟6 ∥ iris ∥ blendshapes] ∈ ℝ20 .
+9. Apply calibration offset: 𝑣corr = 𝑣 − offset.
+^
+
+^
+
+10. Apply EMA: 𝑣𝑡 = 𝛼 ⋅ 𝑣corr + (1 − 𝛼) ⋅ 𝑣𝑡−1
+
+34
+
+College of Science and Computer Studies
+Computer Science Department
+
+^
+
+11. Run GazeMLP ONNX graph: logits = 𝑊3 ⋅ GELU(𝑊2 ⋅ GELU(𝑊1 ⋅ 𝑣 + 𝑏1 ) + 𝑏2 ) + 𝑏3
+12. Compute softmax probabilities; zone = argmax(probabilities).
+13. Evaluate off-road hysteresis counter; set DISTRACTION_ALERT if counter ≥ 45 frames.
+14. Compute eye_avg = (eyeBlinkLeft + eyeBlinkRight)/2.
+15. Evaluate microsleep hysteresis (eye\_avg > 0.5 for ≥ 12 frames).
+16. Evaluate yawn hysteresis (jawOpen > 0.5 for ≥ 45 frames).
+17. Update 60-second PERCLOS window; set PERCLOS_ALERT if > 0.20.
+18. If any alert is active: trigger piezo buzzer and HUD warning.
+
+Time Complexity:
+•
+
+MediaPipe FaceLandmarker:
+
+𝑂(𝑊 ⋅ 𝐻 + 𝐿)
+Where 𝑊, 𝐻 = input frame dimensions; 𝐿 = 478 landmarks.
+•
+
+Feature Vector Construction:
+
+𝑂(𝐿)
+Linear in landmark count; constant for fixed 𝐿 = 478.
+•
+
+EMA Update:
+
+𝑂(𝐷)
+Where 𝐷 = 20 (feature dimension)002E
+
+35
+
+College of Science and Computer Studies
+Computer Science Department
+
+•
+
+GazeMLP Forward Pass:
+
+𝑂(𝐷 ⋅ 𝐻1 + 𝐻1 ⋅ 𝐻2 + 𝐻2 ⋅ 𝐶)
+Where 𝐷 = 20, 𝐻1 = 𝐻2 = 64 (hidden units), 𝐶 = 9 (classes). With these values: 20·64 +
+64·64 + 64·9 = 1280 + 4096 + 576 = 5952 multiply-accumulate operations (submillisecond).
+•
+
+Hysteresis Evaluation:
+
+𝑂(1)
+per counter.
+•
+
+PERCLOS Window Update:
+
+𝑂(1)
+amortized (circular buffer append + sum).
+Mathematical Representation:
+1. 6D Rotation Representation (Zhou et al., 2019):
+
+𝑟6 = [𝑅:,0 ⊕ 𝑅:,1 ] ∈ ℝ6
+Where 𝑅 ∈ ℝ3×3 is the upper-left rotation sub-matrix of the 4×4 MediaPipe facial
+transformation matrix, and ⊕ denotes vector concatenation.
+
+36
+
+College of Science and Computer Studies
+Computer Science Department
+
+2. Normalized Iris Gaze Vector (per eye):
+
+iris𝑝 − eye_center
+𝑔𝑥 =
+⋅2
+eye_width
+(with 𝑔𝑦 formulated analogously for the y-axis)
+Where
+
+iris𝑝
+
+is
+
+the
+
+(𝑥, 𝑦)
+
+position
+
+of
+
+the
+
+iris
+
+center
+
+landmark,
+
+eye_center = 0.5 ⋅ (𝑝inner + 𝑝outer ) is the midpoint of the eye-corner anchors, and
+eye_width = ||𝑝outer − 𝑝inner ||.
+3. Feature Vector:
+
+𝑣 = [𝑟6 ∥ 𝑔𝑥_𝐿 , 𝑔𝑦_𝐿 , 𝑔𝑥_𝑅 , 𝑔𝑦_𝑅 ∥ 𝑏1 , … , 𝑏10 ] ∈ ℝ20
+4. Per-User Calibration Offset:
+
+offset = 𝜇user,front − 𝜇dataset,front
+𝑣corr = 𝑣 − offset
+Where 𝜇user,front is the mean of feature vectors sampled during the 5-second calibration,
+and 𝜇dataset,front is the class-mean feature vector computed from the training set.
+
+37
+
+College of Science and Computer Studies
+Computer Science Department
+
+5. Exponential Moving Average Smoothing:
+
+^
+
+^
+
+𝑣𝑡 = 𝛼 ⋅ 𝑣corr,𝑡 + (1 − 𝛼) ⋅ 𝑣𝑡−1
+6. GazeMLP Forward Pass:
+
+^
+
+ℎ1 = GELU(𝑊1 ⋅ 𝑣 + 𝑏1 )
+ℎ2 = GELU(𝑊2 ⋅ ℎ1 + 𝑏2 )
+logits = 𝑊3 ⋅ ℎ2 + 𝑏3
+
+𝑝𝑘 =
+
+exp(logits𝑘 )
+∑𝑗 exp (logits𝑗 )
+
+zone = arg𝑚𝑎𝑥 𝑝𝑘
+𝑘
+
+7. Temporal Hysteresis Counter:
+
+𝑐𝑡 = 𝑐𝑡−1 + 1if condition𝑡 = True, else 0
+alert𝑡 = 1if 𝑐𝑡 ≥ 𝑇, else 0
+
+38
+
+College of Science and Computer Studies
+Computer Science Department
+
+8. PERCLOS:
+
+𝑁
+
+PERCLOS =
+
+1
+∑ 𝟙 [eye_avg𝑖 > 𝜃eye ]
+𝑁
+𝑖=1
+
+Where 𝑁 is the size of the 60-second trailing window, 𝜃eye = 0.5, and 𝟙[⋅] is the indicator
+function.
+9. Blink Rate:
+
+blink_rate =
+
+blink_count
+session_duration/60
+
+39
+
+College of Science and Computer Studies
+Computer Science Department
+
+Pseudocode:
+FUNCTION extractFeatures(matrix4x4, landmarks, blendshapeList):
+R = matrix4x4[0:3, 0:3]
+r6d = CONCAT(R[:,0], R[:,1])
+// 6-D rotation
+iris = computeIrisGaze(landmarks)
+// 4-D iris
+bsh = selectBlendshapes(blendshapeList, BSH_NAMES) // 10-D
+RETURN CONCAT(r6d, iris, bsh)
+// v ∈ R^20
+FUNCTION processFrame(frame, session, calibration, ema_state):
+mp_result = mediaPipe.detectForVideo(RGB(frame), timestamp_ms)
+IF mp_result.face_landmarks IS EMPTY:
+ema_state.reset()
+RETURN STATE_FACE_LOST
+// Path A — Gaze classification
+v = extractFeatures(mp_result.matrix, mp_result.landmarks, mp_result.blendshapes)
+v_corr = v - calibration.offset
+v_smooth = ema_state.update(v_corr)
+// EMA α=0.3
+logits = gazeMLPOnnxSession.run(v_smooth)
+probs = softmax(logits)
+zone = GAZE_ZONES[argmax(probs)]
+off_road = NOT is_on_road(zone)
+distr_alert = offRoadCounter.update(off_road) // T=45 frames
+// Path B — Drowsiness rules
+eye_avg = (bsh["eyeBlinkLeft"] + bsh["eyeBlinkRight"]) / 2
+jaw_open = bsh["jawOpen"]
+micro_alert = microsleepCounter.update(eye_avg > 0.5) // T=12 frames
+yawn_alert = yawnCounter.update(jaw_open > 0.5) // T=45 frames
+perclos_window.append(1 IF eye_avg > 0.5 ELSE 0)
+perclos = SUM(perclos_window) / LEN(perclos_window)
+perc_alert = perclos > 0.20 AND LEN(perclos_window) > FPS
+// Signal fusion
+alert = distr_alert OR micro_alert OR yawn_alert OR perc_alert
+IF alert:
+triggerBuzzer()
+updateHUD(zone, probs, perclos, session_metrics)
+RETURN zone, probs, perclos, alert
+
+40
+
+College of Science and Computer Studies
+Computer Science Department
+
+3.4 Operational Framework
+3.4.1. Operational Framework Diagram
+
+The researchers implemented a comprehensive operational framework organized into
+three interconnected phases: Input, Process, and Output. The diagram systematically transforms
+raw camera frames into actionable safety interventions.
+The Input phase establishes the foundation for real-time perception and personalization. A
+continuous live video feed at 1280×720 pixels is captured from a compatible RGB (or IR-capable)
+camera. The system’s intelligence is derived from the GazeMLP model trained on labelled
+frames from the Driver Monitoring Dataset; the trained weights and feature normalization statistics
+are compiled into a single ONNX file deployed to the device. At session start, a 5-second neutralpose calibration window samples the driver’s frontal-gaze feature distribution to compute a
+personalized correction offset.
+The Process phase executes a single MediaPipe FaceLandmarker inference per frame, then
+branches into the two parallel paths described in Section 3.2. Path A constructs the geometric
+feature vector, applies the calibration offset and EMA smoothing, and classifies the result through
+41
+
+College of Science and Computer Studies
+Computer Science Department
+
+GazeMLP. Path B evaluates blendshape activations against threshold rules. The signal fusion step
+consolidates all active conditions through independent hysteresis counters before issuing a binary
+alert decision.
+The Output phase delivers tangible real-time interventions. Attentive states continue the
+monitoring loop. Alert states trigger the 5V piezo buzzer and update the on-screen HUD with the
+active warning. Throughout the loop, a session metrics record accumulates per-frame latency
+figures, event counts (off-road, microsleep, yawn, blink), cumulative off-road time, and PERCLOS
+for offline analysis, without cloud connectivity.
+3.5 Use Case / Flowchart / State Diagram
+The GAZE application is designed to enhance driver attention monitoring for PUV operators.
+It leverages MediaPipe facial landmark extraction (geometric features and blendshapes) and a
+lightweight GazeMLP neural network classifier to provide real-time, offline driver attention
+information on an edge device.
+
+42
+
+College of Science and Computer Studies
+Computer Science Department
+
+3.5.1. Use Case
+3.5.1.1 Use Case Diagram
+
+43
+
+College of Science and Computer Studies
+Computer Science Department
+
+Gaze serves one primary actor: the Driver (PUV operator). The process begins with
+hardware initialization; the camera stream is opened and the GazeMLP ONNX model is loaded into
+the ONNX Runtime session. The driver then completes a 5-second neutral-pose calibration (UC2)
+during which a countdown is displayed on the HUD. Following calibration, the system enters the
+continuous monitoring loop (UC3).
+Each iteration of the loop invokes MediaPipe FaceLandmarker to extract landmarks and
+blendshapes (single pass), constructs the 20-D feature vector, applies the calibration and EMA,
+classifies gaze zone via GazeMLP (UC4A), and simultaneously evaluates blendshape drowsiness
+rules (UC4B). If the distraction or drowsiness threshold is breached (UC5), the buzzer triggers and
+the HUD show the alert. The driver may re-initiate calibration at any time via the on-screen
+CALIBRATE button or the 'c' key (UC6) or reset all session counters via the RESET button or 'r' key
+(UC7). The session terminates on 'q' (UC8) with a final metrics summary.
+
+44
+
+College of Science and Computer Studies
+Computer Science Department
+
+3.5.2. Flowchart
+3.5.2.1 Flowchart Diagram
+
+45
+
+College of Science and Computer Studies
+Computer Science Department
+
+The flowchart illustrates the sequential, conditional, and priority-ordered logic of the hybrid
+Gaze perception pipeline. The process initiates with hardware and software initialization, wherein
+the camera feed is established and the ONNX model, Exponential Moving Average (EMA) state,
+and temporal counters are loaded into memory. A mandatory 5-second neutral-pose calibration is
+then executed to compute a personalized driver offset. During the continuous monitoring loop, the
+system captures a video frame and verifies face detection. If the face is lost, the system actively
+resets the EMA to prevent stale data from corrupting future predictions.
+Upon successful facial tracking, the workflow executes parallel feature processing. It first
+constructs a 20-dimensional geometric feature vector, applies the calibration offset, smooths the
+data via EMA, and passes it through the GazeMLP ONNX model to classify the driver's gaze zone.
+Concurrently, the system extracts specific facial blendshapes to evaluate physiological
+drowsiness markers. These dual outputs are then evaluated across four independent hysteresis
+counters: a Distraction Alert (triggered if the gaze is off-road for ≥ 45 frames), a Microsleep Alert (if
+eye closure is sustained for ≥ 12 frames), a Yawn Alert (if the jaw remains open for ≥ 45 frames),
+and a PERCLOS Alert (if the proportion of eye closure exceeds 20% over a trailing 60-second
+window). If any of these thresholds are breached, the workflow triggers the hardware buzzer and
+updates the localized Heads-Up Display (HUD). Finally, the loop checks for user hardware
+interrupts, such as session reset or recalibration commands, before seamlessly looping back to
+capture the next frame.
+
+46
+
+College of Science and Computer Studies
+Computer Science Department
+
+3.5.3 State Diagram
+3.5.3.1. State Diagram
+
+47
+
+College of Science and Computer Studies
+Computer Science Department
+
+The state diagram captures the runtime behavior of Gaze. The system begins in Initializing,
+where the camera stream is opened and the ONNX model is loaded into memory. A successful
+face detection transitions the system to Calibrating, where the 5-second neutral-pose window is
+recorded and the personalized calibration offset is computed. If calibration captures fewer than 30
+valid frames, the offset defaults to zero (identity calibration).
+The system then enters the central Monitoring superstate, which encapsulates two internal
+states: FaceDetected (the normal operational mode) and FaceLost (triggered when MediaPipe
+returns no landmarks for a frame, causing an EMA reset to prevent stale smoothed values from
+propagating). Within Monitoring, each frame independently updates all four alert paths. Alert states
+are entered when the respective hysteresis threshold is crossed and exited as soon as the
+underlying condition is no longer sustained. These transitions are independent, meaning multiple
+alerts can be active simultaneously. The CALIBRATE and RESET controls are available from any
+Monitoring state, allowing the operator to re-personalize the system or clear accumulated session
+metrics mid-session without restarting the application.
+3.6 Respondents of the Study
+The researchers decided that they will conduct surveys and empirical prototype testing to
+gather the needed data from respondents. To facilitate a structured and realistic data gathering
+process, the researchers will partner with a commercial transport or fleet management company
+operating within the CALABARZON region. Surveys and user acceptance tests are chosen as the
+primary data collection methods for their effectiveness in collecting standardized information from
+this diverse sample population. This is essential for evaluating the Gaze application's usability,
+
+48
+
+College of Science and Computer Studies
+Computer Science Department
+
+performance efficiency, and perceived effectiveness as a safety intervention across different
+transport sector groups.
+3.6.1 Non-Probability Sampling: Purposive Sampling
+The study will employ purposive sampling, a non-probability sampling technique where
+respondents are intentionally hand-picked based on the researchers' judgment and specific
+inclusion criteria. Because the study requires data that reflects the realities of prolonged driving,
+random sampling of the general public would be ineffective. Instead, purposive sampling allows
+the researchers to leverage the partner company to exclusively select individuals holding valid
+professional driver's licenses who actively operate heavy commercial or public utility vehicles. By
+targeting these specific "expert" users, the research ensures that the system is evaluated against
+the unique fatigue factors, erratic shift scheduling, and complex cabin conditions inherent to the
+professional transport sector.
+3.6.2 Time-Delimited Sampling Scope
+In contrast to traditional sociological studies that rely on a strict headcount of respondents,
+the primary metric for validating this engineering prototype is time-based. To guarantee system
+reliability under real-world conditions, the data collection scope is rigidly delimited to
+accumulating 50 to 100 hours of active, on-road driving data. The precise number of individual
+drivers selected will simply be the targeted amount required to fulfill this 50-to-100-hour
+cumulative testing requirement. The overall data collection scope will be purposively distributed
+among three key stakeholder groups:
+
+49
+
+College of Science and Computer Studies
+Computer Science Department
+
+•
+
+The Primary Test Group: A targeted selection of licensed PUV drivers who will accumulate
+the driving hours to directly test the real-time accuracy and computational latency of the
+system.
+
+•
+
+The Evaluation Panel: A small subset of the partner company's fleet managers selected
+to evaluate the system's offline data logging and administrative viability.
+
+•
+
+The Feedback Panel: A targeted group of regular commuters to provide secondary
+qualitative feedback regarding the non-intrusiveness of the localized buzzer alerts during
+actual transport operations.
+
+3.6.3 Data Collection Instruments
+A structured questionnaire will be developed and administered, using Google Forms to
+collect qualitative data from all respondent groups following the on-road pilot testing. The
+questionnaire will contain both closed and open-format questions, heavily grounded in the ISO/IEC
+25010 software quality model to specifically measure user acceptability, performance efficiency,
+and functional suitability. For the quantitative evaluation, empirical observation logs generated
+dynamically by the Raspberry Pi 5 will be recorded during the 50 to 100 hours of active field testing.
+These system logs will objectively capture hardware latency, sustained inference speeds, and
+event detection counts without relying on human memory.
+3.6.4 Data Analysis Methods
+3.6.4.1 Descriptive Statistics
+Descriptive statistics will be used to summarize and interpret the data collected from the
+study. Measures of central tendency, such as the mean, median, and mode, will be calculated to
+50
+
+College of Science and Computer Studies
+Computer Science Department
+
+understand the typical values within the qualitative dataset, particularly for Likert-scale responses
+regarding user acceptance. Measures of dispersion, including standard deviation, variance, and
+range, will be critical for evaluating the quantitative hardware logs, specifically to assess the
+spread or variability of the system's sub-50ms latency target across the 50-to-100-hour test
+duration. Additionally, frequency distributions will be computed for the types of safety events
+triggered (e.g., yawning, microsleep, distraction) to provide an overview of driver behavior patterns.
+3.6.4.2 Inferential Statistics
+To draw conclusions beyond the immediate data and identify underlying patterns among
+the purposively selected groups, inferential statistical methods will be applied. Non-parametric
+alternatives or standard Chi-square tests will be conducted to assess significant associations
+between categorical variables (e.g., a driver's years of professional experience versus their
+acceptance of AI monitoring). T-tests and Analysis of Variance (ANOVA) will be utilized to compare
+mean satisfaction values across the different user groups (drivers, operators, and commuters).
+Correlation analysis will be performed to explore the strength and direction of relationships
+between continuous variables, specifically examining if an increase in a driver's continuous shift
+time correlates with a higher frequency of localized buzzer interventions.
+3.6.5 Ethical Considerations
+The researchers will follow strict ethical guidelines to protect participants' rights, privacy,
+and welfare throughout the study. All participants will be asked to sign informed consent forms
+before proceeding, which outline the purpose and objectives of the research, the voluntary nature
+of participation, the right to withdraw at any time without penalty, data collection procedures, and
+
+51
+
+College of Science and Computer Studies
+Computer Science Department
+
+potential risks and benefits. Any conflicts of interest will be disclosed before and during the study
+to maintain transparency.
+Privacy and confidentiality of all collected data will be strictly protected, which is of
+paramount importance given the camera-based nature of the Gaze system. The researchers will
+assure participants that the live video feed utilized by the system is processed entirely offline on
+the edge device in real-time, with absolutely no facial imagery recorded, stored, or transmitted to
+external cloud servers. All electronic questionnaire data will be collected through secure digital
+forms utilizing SSL encryption for data transmission, particularly Google Forms, with access
+restricted only to authorized research members.
+The use of purposive sampling will be carefully managed to ensure that while specific
+operational criteria are met, the selection process remains fair and transparent within the partner
+organization. The researchers commit to responsible reporting by handling all findings with integrity
+and providing accurate feedback without misrepresentation. They will acknowledge the limitations
+of the research, including the daytime-only testing constraint, and share results with participants
+and the partner company who express interest in the outcomes. All ethical protocols will be
+reviewed and approved by the appropriate institutional review boards before the commencement
+of data collection, ensuring objectivity and transparency throughout the entire research process.
+
+52
+
+College of Science and Computer Studies
+Computer Science Department
+
+REFERENCES
+AAA Foundation for Traffic Safety. (November, 2023). Drowsy Driving Is a Factor in 21% of Fatal
+Crashes. Why Don’t We Talk About It More?. https://www.sleepfoundation.org/sleepnews/drowsy-driving-is-a-factor-in-21-percent-of-fatal-crashes.
+Abou Ali, M., Dornaika, F., & Cherafeddin, J. (November, 2025). Agentic AI: a comprehensive survey
+of
+
+architectures,
+
+applications,
+
+and
+
+future
+
+directions,
+
+https://www.researchgate.net/publication/397626041_Agentic_AI_a_comprehensive_survey
+_of_architectures_applications_and_future_directions.
+Akkarasrisawad, P., & Vanichkobchinda, P. (December, 2025). Serial Mediation Effects of Driver
+Fatigue and Cognitive Impairment on the Relationship Between Occupational Stressors and
+Wellbeing
+
+Among
+
+Commercial
+
+Truck
+
+Drivers:
+
+A
+
+PLS-SEM
+
+Analysis.
+
+https://www.mdpi.com/2071-1050/17/24/11162.
+Anderson, D., Ghate, D. A., & Rizzo, M. (January, 2021). Vision, attention, and driving. Handbook of
+Clinical
+
+Neurology.
+
+https://www.researchgate.net/publication/350632818_Vision_attention_and_driving.
+Bermoy, L., & Sanchez, J. (December, 2025). Development and Evaluation of a Vision-Based Driver
+Distraction Detection System using Hybrid Eye- Tracking and 3D Head Pose Estimation.
+https://www.researchgate.net/publication/398665627_Development_and_Evaluation_of_a_
+Vision-Based_Driver_Distraction_Detection_System_using_Hybrid_Eye_Tracking_and_3D_Head_Pose_Estimation.
+
+53
+
+College of Science and Computer Studies
+Computer Science Department
+
+Bhasker, V. V., Bachu, S., Veeresh, A., Anusha, S., Rani, P., & Naga Pavansai, K. (June, 2025). Driver
+Drowsiness
+
+Detection
+
+System
+
+Using
+
+Raspberry
+
+Pi.
+
+https://www.ijsred.com/volume8/issue3/IJSRED-V8I3P553.pdf.
+Boon, E. L., Dela Cruz, G. N., Honrada, C. B., Javier, T. J. T., Lozada, P. R. O., & Ditucalan, T.
+(February, 2026). Lumina Alert: A YOLOv11n-Based Embedded System for Real-Time Driver
+Drowsiness
+
+Detection
+
+and
+
+Multi-Modal
+
+Intervention.
+
+https://www.researchgate.net/publication/401350914_Lumina_Alert_A_YOLOv11nBased_Embedded_System_for_Real-Time_Driver_Drowsiness_Detection_and_MultiModal_Intervention.
+Castilla, D., Plarisan, J., Sarsalejos, R., Shenna, K., Acaso, M., & Cabiging, A. Y. (May, 2023).
+International Journal of Social Sciences: Current and Future Research Trends (IJSSCFRT) A
+Correlation Between the Types of Driving Distractions and Number of Accidents Encountered
+by
+
+Public
+
+Drivers
+
+in
+
+Danao
+
+City
+
+Terminal.
+
+https://www.researchgate.net/publication/370766328_International_Journal_of_Social_Scie
+nces_Current_and_Future_Research_Trends_IJSSCFRT_A_Correlation_Between_the_Types_
+of_Driving_Distractions_and_Number_of_Accidents_Encountered_by_Public_Drivers_in_Da.
+Centers for Disease Control and Prevention. (March, 2024). NIOSH Training for Nurses on Shift
+Work
+
+and
+
+Long
+
+Work
+
+Hours.
+
+https://www.cdc.gov/niosh/work-hour-training-for-
+
+nurses/longhours/mod3/08.html.
+Chandwani, L., Khilari, J., Gurjar, K., Maragale, P., Sonare, A., Kakade, S. M., Bhatt, A., & Kulkarni,
+R. (June, 2023). Gesture based Sign Language Recognition system using Mediapipe.
+
+54
+
+College of Science and Computer Studies
+Computer Science Department
+
+https://www.researchgate.net/publication/371937989_Gesture_based_Sign_Language_Reco
+gnition_system_using_Mediapipe.
+Department of Information and Communications Technology. (2025). Digital cities 2025 location
+primer. DICT. https://cms-cdn.e.gov.ph/DICT/pdf/Digital-Cities-2025-Primer.pdf.
+Department of Transportation, & Deutsche Gesellschaft für Internationale Zusammenarbeit.
+(December,
+
+2016).
+
+Jeepney+
+
+NAMA
+
+framework.
+
+https://www.international-climate-
+
+initiative.com/en/ikimedia/publication/the_jeepney_nama_transforming_public_transport_in_the_philippines/.
+European Parliament and Council. (November, 2019). Regulation (EU) 2019/2144 of the European
+Parliament and of the Council. Official Journal of the European Union. https://eurlex.europa.eu/eli/reg/2019/2144/oj/eng.
+Fonseca, T., & Ferreira, S. (August, 2025). Drowsiness Detection in Drivers: A Systematic Review
+of
+
+Deep
+
+Learning-Based
+
+Models.
+
+https://www.researchgate.net/publication/394892904_Drowsiness_Detection_in_Drivers_A
+_Systematic_Review_of_Deep_Learning-Based_Models.
+Fridman,
+
+L.,
+
+Reimer,
+
+B.,
+
+Mehler,
+
+B.,
+
+&
+
+Freeman,
+
+W.
+
+T.
+
+(April,
+
+2018).
+
+https://dl.acm.org/doi/10.1145/3173574.3174226.
+Future Market Insights. (March, 2026). Driver monitoring systems market analysis. FMI.
+https://www.futuremarketinsights.com/reports/driver-monitoring-system-market.
+Gao, Z., Chen, X., Xu, J., Yu, R., Zhang, H., & Yang, J. (December, 2024). Semantically-enhanced
+feature extraction with CLIP and transformer networks for driver fatigue detection.
+https://www.mdpi.com/1424-8220/24/24/7948.
+
+55
+
+College of Science and Computer Studies
+Computer Science Department
+
+Howard, A., Sandler, M., Chu, G., Chen, L.-C., Chen, B., Tan, M., Wang, W., Zhu, Y., Pang, R.,
+Vasudevan, V., Le, Q. V., & Adam, H. (November, 2019). Searching for MobileNetV3.
+Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV), 1314–1324.
+https://ieeexplore.ieee.org/document/9008835.
+i-DREAMS Project. (April, 2023). How corporate social responsibility can support road safety, and
+how road safety can improve the transport business (Policy Brief No. 3). European Union
+Horizon
+
+2020.
+
+https://idreamsproject.eu/wp/wp-
+
+content/uploads/2019/05/iDREAMS_814761_PolicyBrief_Spring2023_Finalgecomprimeerd.pdf.
+International Organization for Standardization. (March, 2011). Systems and software engineering
+— Systems and software Quality Requirements and Evaluation (SQuaRE) — System and
+software
+
+quality
+
+models
+
+(ISO/IEC
+
+Standard
+
+No.
+
+25010:2011).
+
+https://www.iso.org/standard/35733.html.
+International Road Assessment Programme. (September, 2025). 2025 Transportation Forum:
+Connecting for Road Safety in the Philippines. iRAP. https://irap.org/2025/09/2025transportation-forum-connecting-for-road-safety-in-the-philippines/.
+Klauer, S. G., Dingus, T. A., Neale, V. L., Sudweeks, J. D., & Ramsey, D. J. (April, 2006). The impact
+of driver inattention on near-crash/crash risk: An analysis using the 100-car naturalistic driving
+study data (Report No. DOT HS 810 594). National Highway Traffic Safety Administration.
+https://rosap.ntl.bts.gov/view/dot/62931.
+
+56
+
+College of Science and Computer Studies
+Computer Science Department
+
+Lei, J., Ni, Z., Peng, Z., Hu, H., Hong, J., Fang, X., Yi, C., Ren, C., & Wasaye, M. A. (February, 2025).
+An intelligent network framework for driver distraction monitoring based on RES-SE-CNN.
+Scientific Reports, 15, Article 2775. https://www.nature.com/articles/s41598-025-91293-5.
+Lugaresi, C., Tang, J., Nash, H., McClanahan, C., Uboweja, E., Hays, M., ... & Grundmann, M. (June,
+2019).
+
+MediaPipe:
+
+A
+
+framework
+
+for
+
+building
+
+perception
+
+pipelines.
+
+https://arxiv.org/abs/1906.08172.
+Mangaluz, J. (2025, May 7). DOTr resumes PUV consolidation process. Philstar Global.
+https://www.philstar.com/headlines/2025/05/07/2441438/dotr-resumes-puvconsolidation-process
+Murphy-Chutorian, E., & Trivedi, M. M. (April, 2009). Head pose estimation in computer vision: A
+survey. IEEE Transactions on Pattern Analysis and Machine Intelligence, 31(4), 607–626.
+https://dl.acm.org/doi/abs/10.1109/tpami.2008.106.
+Osorio, C. M., Montano, K. P., Apuya, O. J. J., & Gempesao, M. C. (July, 2025). Driver's road safety
+practices and behavior as perceived by road users. International Journal of Arts and Social
+Science, 8(7). https://www.ijassjournal.com/e1x65.html.
+Pawar, S. A., Shendre, P., Ansari, A., Hinge, K., & Ahmad, A. (May, 2025). Real-time driver
+drowsiness detection using ESP32 and eye blink sensor. Journal of Emerging Technologies and
+Innovative Research, 12(4). https://www.jetir.org/view?paper=JETIR2504B45
+Peters, S. E., Grogan, H., Henderson, G. M., López Gómez, M. A., Martínez Maldonado, M., Silva
+Sanhueza, I., & Dennerlein, J. T. (September, 2021). Working conditions influencing drivers'
+safety and well-being in the transportation industry: “On board” program. International Journal
+
+57
+
+College of Science and Computer Studies
+Computer Science Department
+
+of
+
+Environmental
+
+Research
+
+and
+
+Public
+
+Health,
+
+18(19),
+
+Article
+
+10173.
+
+https://www.mdpi.com/1660-4601/18/19/10173.
+Rahman, M. S., Venkatachalapathy, A., Sharma, A., Wang, J., Velipasalar Gursoy, S., Anastasiu, D.,
+& Wang, S. (April 2023). Synthetic distracted driving (SynDD2) dataset for analyzing distracted
+behaviors and various gaze zones of a driver. arXiv. https://arxiv.org/abs/2204.08096.
+Safarov, F., Akhmedov, F., Abdusalomov, A. B., Nasimov, R., & Cho, Y. I. (July, 2023). Real-Time
+Deep Learning-Based Drowsiness Detection: Leveraging Computer-Vision and Eye-Blink
+Analyses for Enhanced Road Safety. Sensors, 23(14), 6459. https://www.mdpi.com/14248220/23/14/6459.
+Soukupová, T., & Čech, J. (February, 2016). Real-time eye blink detection using facial landmarks.
+21st
+
+Computer
+
+Vision
+
+Winter
+
+Workshop
+
+(CVWW).
+
+https://vision.fe.uni-
+
+lj.si/cvww2016/proceedings/papers/05.pdf.
+Strayer, D. L., & McDonnell, A. S. (2025). SPIDER 2.0: Driver distraction and visual attention. Annual
+Review
+
+of
+
+Vision
+
+Science,
+
+11,
+
+521–540.
+
+https://www.annualreviews.org/content/journals/10.1146/annurev-vision-110423-025626.
+Tarun, T., Sanjay, G., & Kumar, R. (January, 2023). Driver drowsiness detection and alert system by
+using GPS & GSM. International Journal of Innovative Technologies in Computing Engineering,
+11(1), 12–18. https://ijitce.org/index.php/ijitce/article/view/341.
+UNESCO. (2024). Readiness assessment methodology (RAM) report for the Philippines. UNESCO.
+https://www.unesco.org/ethics-ai/en/philippines.
+
+58
+
+

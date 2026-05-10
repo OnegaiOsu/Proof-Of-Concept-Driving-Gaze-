@@ -1,0 +1,678 @@
+College of Science and Computer Studies
+Computer Science Department
+
+==========================================================================
+CHAPTER III — CORRECTED CONTENT
+This file contains the corrected replacement text for all sections of
+Chapter III that were misaligned with the actual GAZE implementation.
+Sections not listed here (3.6 and its subsections) are unchanged.
+==========================================================================
+
+────────────────────────────────────────────────────────────────────────
+SECTION 3.1  SOFTWARE DEVELOPMENT METHODOLOGY
+3.1.1  Prototyping Model
+────────────────────────────────────────────────────────────────────────
+
+The researchers employed the Prototyping Model as the primary software
+development life cycle (SDLC) for the engineering of the GAZE system.
+Given the hybrid nature of the architecture, fusing a high-fidelity
+geometric landmark extractor with a lightweight neural gaze classifier
+and rule-based drowsiness detector, an iterative approach was strictly
+necessary. Unlike rigid linear frameworks, the Prototyping Model allowed
+the development team to progressively validate each component under the
+real-time latency budget of the target Raspberry Pi 5 before integrating
+the next layer.
+
+Figure 1. The Iterative Prototyping Model Applied in the Development of the GAZE Driver Attention Monitoring System
+
+----------- MERMAID: Prototyping Model -----------
+flowchart TD
+    A([Start]) --> B[1. Requirement Analysis\nTarget hardware, datasets, feature design]
+    B --> C[2. Quick Design\nModular Python pipeline blueprint]
+    C --> D[3. Cross-Platform Prototyping\nGazeMLP trained on DMD — workstation GPU]
+    D --> E[4. Hardware Migration\nONNX export and Pi 5 validation]
+    E --> F[5. Refinement\nCalibration, hysteresis tuning, HUD]
+    F --> G{Meets latency\n& accuracy targets?}
+    G -- No --> C
+    G -- Yes --> H([6. Final Product\nStandalone GAZE Prototype])
+--------------------------------------------------
+
+1. Requirement Analysis
+
+   For the initial requirements phase, the researchers established the
+   operational boundaries for a hybrid detection system tailored for the
+   Philippine logistics sector. The proponents defined the Raspberry Pi 5
+   as the target hardware platform, providing adequate ARM-NEON
+   vectorisation for the MediaPipe inference workload. The team identified
+   the Driver Monitoring Dataset (DMD) as the primary training source: a
+   large-scale, subject-labelled gaze dataset recorded inside an
+   instrumented vehicle cabin with a frontal RGB camera. Hardware
+   requirements remained focused on offline reliability, utilising a
+   compatible camera module and an active 5V piezo buzzer for the
+   localised audible intervention.
+
+2. Quick Design
+
+   Following the establishment of hardware constraints, the team developed
+   a structural blueprint for the system's perception-to-decision logic
+   flow. This phase focused on a modular design across dedicated Python
+   sub-packages: one for leakage-free subject-disjoint data splits, one
+   for model training and evaluation, and one for live edge execution.
+   The design prioritised a clean separation between the learned gaze
+   classifier and the rule-based drowsiness detector so that each
+   component could be tuned and evaluated independently.
+
+3. Cross-Platform Prototyping
+
+   To ensure high accuracy before introducing hardware limitations, the
+   machine learning pipeline was developed and benchmarked on a high-
+   performance GPU workstation. The researchers designed a compact
+   Multi-Layer Perceptron (GazeMLP) to classify gaze zone directly from
+   a 20-dimensional geometric feature vector extracted by MediaPipe
+   FaceLandmarker. This approach deliberately avoids processing raw
+   pixels: the feature vector encodes head rotation, normalised iris
+   position, and eye-direction blendshape activations — representations
+   that are invariant to frame translation, scale, and moderate camera
+   placement variation. Training on 65,345 labelled frames from 12
+   subjects (Driver Monitoring Dataset), the classifier achieved a 9-class
+   test accuracy of 72–75% and a binary on-road / off-road accuracy of
+   79% on a held-out subject group. The entire training run completes in
+   under 10 seconds on the development workstation, enabling rapid
+   ablation experiments.
+
+4. Hardware Migration
+
+   Once the GazeMLP was validated, it was exported to the Open Neural
+   Network Exchange (ONNX) format using a normalisation wrapper that
+   bakes the training-set mean and standard deviation into the model graph.
+   This single-file artefact (models/gaze_mlp.onnx) is loaded on the
+   Raspberry Pi via the ONNX Runtime CPU execution provider with two
+   intra-operation threads. MediaPipe's built-in facial transformation
+   matrix provides a numerically stable head rotation directly from the
+   landmark solve, eliminating the need for a separate cv2.solvePnP call
+   and its associated jitter. The complete per-frame pipeline — capture,
+   MediaPipe, feature construction, EMA, ONNX inference — targets a total
+   latency of ≤ 50 ms on the Pi 5.
+
+5. Refinement
+
+   With the system executing on the Raspberry Pi 5, the team engaged in
+   continuous refinement to stabilise real-world performance. The
+   researchers implemented Exponential Moving Average (EMA, α = 0.3)
+   smoothing on the 20-D feature vector to suppress single-frame landmark
+   jitter without introducing the phase lag of a long rolling window. A
+   crucial addition was per-driver calibration. Recognising that
+   individual variation in head posture and resting eye position creates
+   a systematic offset between a driver's feature distribution and the
+   DMD training population, the system captures a 5-second neutral-pose
+   window at session start. The mean feature vector during this window
+   defines the user's frontal reference; a population-level frontal mean
+   computed from the training set serves as the anchor. The difference
+   is subtracted from every subsequent feature vector, aligning the
+   driver's feature space to the training distribution (Fridman et al.,
+   2018).
+
+6. Final Product
+
+   The culmination of the iterative cycle resulted in a standalone
+   GAZE Prototype. The finalized system operates as a unified
+   perception loop, achieving a latency target of ≤ 50 ms per frame
+   while simultaneously classifying gaze zone and monitoring
+   physiological drowsiness signals. Powered by a 5V 3A source, the
+   system is fully vehicular-mobile and ready for empirical validation
+   with licensed professional drivers.
+
+
+────────────────────────────────────────────────────────────────────────
+SECTION 3.2  CONCEPTUAL FRAMEWORK
+────────────────────────────────────────────────────────────────────────
+
+Figure 2. Conceptual Framework of the GAZE System Showing the Input, Process, and Output Layers of the Hybrid Driver Attention Monitoring Pipeline
+
+----------- MERMAID: Conceptual Framework -----------
+flowchart TD
+    subgraph INPUT["INPUT LAYER"]
+        I1[Live RGB Video\nCamera Feed]
+        I2[DMD Training Dataset\n65,345 labelled frames\n12 subjects]
+        I3[5-second Neutral-Pose\nCalibration Window]
+    end
+
+    subgraph PROCESS["PROCESS LAYER — Hybrid Perception Engine"]
+        P1[MediaPipe FaceLandmarker\n478 landmarks · 52 blendshapes\nFacial transformation matrix]
+        P2A[Path A — Gaze Classification\n20-D Feature Vector → GazeMLP\n→ 9-class zone · EMA · Hysteresis]
+        P2B[Path B — Drowsiness Detection\nBlendshape Rules\nMicrosleep · Yawn · PERCLOS]
+        P3[Signal Fusion\nAlert State Decision Engine]
+    end
+
+    subgraph OUTPUT["OUTPUT LAYER"]
+        O1[Attentive State\nContinue Monitoring]
+        O2[Alert State\n5V Piezo Buzzer\nHUD Warning]
+        O3[Session Metrics Log\nLatency · Events · PERCLOS]
+    end
+
+    INPUT --> PROCESS
+    P1 --> P2A
+    P1 --> P2B
+    P2A --> P3
+    P2B --> P3
+    P3 -->|No threshold breach| O1
+    P3 -->|Threshold exceeded| O2
+    P3 --> O3
+-----------------------------------------------------
+
+The conceptual framework of GAZE delineates the systematic
+progression from theoretical problem identification to physical
+technological intervention. Grounded in the problem domain of driver
+fatigue and visual distraction, the framework integrates the SPIDER
+(Scanning, Predicting, Identifying, Decision-making, and Executing a
+Response) model of visual attention (Strayer et al., 2025) as the
+theoretical basis for defining which gaze zones constitute an attentive
+state.
+
+The Input Layer relies on localised edge computing paired with a live
+RGB camera feed and the Driver Monitoring Dataset (DMD) as the training
+corpus. The input stage also incorporates per-session personalisation
+through a 5-second neutral-pose calibration window that corrects for
+individual variation in head posture and resting iris position.
+
+The Process Layer functions as a hybrid perception engine. A single
+MediaPipe FaceLandmarker pass per frame produces 478 normalised 3D
+landmarks, 52 facial blendshape activations, and a 4×4 facial
+transformation matrix (Lugaresi et al., 2019). These outputs feed two
+parallel paths. Path A constructs a compact 20-dimensional geometric
+feature vector from the rotation matrix and iris positions, applies the
+calibration offset and EMA smoothing, and classifies the result with the
+GazeMLP neural network into one of nine gaze zones. Path B evaluates
+three specific blendshape activations — mean eyelid closure, jaw
+opening, and the Percentage of Eye Closure (PERCLOS) over a 60-second
+window — against fixed thresholds to detect microsleep, yawning, and
+sustained drowsiness. These paths converge at a signal fusion step which
+evaluates all active conditions against temporal hysteresis requirements
+before issuing an alert decision, consistent with the 1.5-second eyes-
+off-road criterion documented in automotive safety literature
+(Klauer et al., 2006).
+
+The Output Layer transforms the processed signals into tangible
+interventions. Normal states continue monitoring; threshold breaches
+trigger the 5V piezo buzzer and on-screen HUD alerts. A session metrics
+log captures latency figures, event counts, PERCLOS values, and blink
+rate for offline analysis without cloud connectivity.
+
+
+────────────────────────────────────────────────────────────────────────
+SECTION 3.3  ALGORITHMS
+3.3.1  Hybrid Perception Pipeline
+────────────────────────────────────────────────────────────────────────
+
+Figure 3. Hybrid Perception Pipeline of the GAZE System Illustrating the Dual-Path Architecture for Learned Gaze Zone Classification (Path A) and Blendshape-Based Drowsiness Detection (Path B)
+
+----------- MERMAID: Hybrid Pipeline -----------
+flowchart TD
+    CAP[Capture BGR Frame\nWebcam / IR Camera] --> MP
+
+    MP["MediaPipe FaceLandmarker\n(VIDEO mode, single pass)\n→ 478 landmarks\n→ 52 blendshapes\n→ 4×4 facial transform matrix"]
+
+    MP --> FV["Path A: Feature Vector Construction\n6-D rotation + 4-D iris + 10-D blendshapes\n→ v ∈ ℝ²⁰"]
+    MP --> DR["Path B: Blendshape Extraction\neyeBlinkLeft, eyeBlinkRight, jawOpen"]
+
+    FV --> CAL["Calibration Offset\nv_corr = v − offset"]
+    CAL --> EMA_S["EMA Smoothing\nv̂_t = α·v_corr + (1−α)·v̂_{t−1}"]
+    EMA_S --> MLP["GazeMLP Inference\nLinear(20→64)→GELU→Dropout\nLinear(64→64)→GELU→Dropout\nLinear(64→9)"]
+    MLP --> SOFT["Softmax → argmax\n→ zone ∈ {9 classes}"]
+    SOFT --> HG["Gaze Hysteresis\noff-road > 45 frames → ALERT"]
+
+    DR --> PERC["PERCLOS\nfraction eye-closed / 60-s window"]
+    DR --> MS["Microsleep Rule\neye_avg > 0.5 for ≥ 12 frames"]
+    DR --> YN["Yawn Rule\njawOpen > 0.5 for ≥ 45 frames"]
+
+    HG --> FUSE["Signal Fusion\nAlert State Decision"]
+    PERC --> FUSE
+    MS --> FUSE
+    YN --> FUSE
+
+    FUSE -->|Attentive| CONT[Continue Monitoring]
+    FUSE -->|Alert| BUZ[Trigger Buzzer + HUD]
+-------------------------------------------------
+
+The GAZE application utilises a hybrid perception pipeline that
+transforms raw video frames into actionable safety alerts. Rather than
+processing raw pixel textures through a large convolutional network, the
+pipeline delegates the computationally intensive landmark solve to
+MediaPipe FaceLandmarker and reduces the downstream classification
+problem to a 20-dimensional geometric vector. This decomposition yields
+a classifier small enough to run at sub-millisecond latency on the
+Raspberry Pi 5 while retaining the generalisation benefits of a learned
+model (Howard et al., 2019).
+
+Each frame is captured from the camera and passed as an RGB image to
+MediaPipe FaceLandmarker operating in VIDEO mode. A single inference
+call returns 478 normalised 3D landmarks, 52 facial blendshape
+activations, and a 4×4 facial transformation matrix encoding the head
+pose relative to the camera frame (Lugaresi et al., 2019). The pipeline
+then diverges into two parallel paths.
+
+PATH A — GAZE CLASSIFICATION (Learned)
+
+A 20-dimensional feature vector is assembled from three sources:
+(i) the 6D rotation representation extracted from the transformation
+matrix's upper-left 3×3 rotation block; (ii) four iris-relative gaze
+scalars normalised per eye to the eye-corner span; and
+(iii) ten eye-direction blendshape activations. The vector is corrected
+by subtracting the per-user calibration offset and then smoothed with
+an Exponential Moving Average filter. The corrected, smoothed vector is
+fed to the GazeMLP — a two-hidden-layer MLP of ~6,000 parameters —
+which outputs a softmax probability distribution over nine gaze zones.
+The predicted zone with the highest probability is evaluated by a
+hysteresis counter: a sustained off-road prediction for 45 consecutive
+frames (1.5 seconds at 30 fps) triggers the distraction alert.
+
+PATH B — DROWSINESS DETECTION (Rule-Based)
+
+Three blendshape activations are extracted from the same MediaPipe pass:
+eyeBlinkLeft, eyeBlinkRight, and jawOpen. These are evaluated against
+fixed thresholds in independent hysteresis counters:
+  - Microsleep: mean eyelid-closure blendshape > 0.5 for ≥ 12 frames
+  - Yawn:       jawOpen > 0.5 for ≥ 45 frames
+  - PERCLOS:    fraction of frames with mean closure > 0.5 over a
+                trailing 60-second window exceeds 0.20
+
+Both paths converge at the signal fusion stage, which evaluates all
+active alert conditions and triggers the hardware intervention if any
+threshold has been breached.
+
+
+STEPS IN ALGORITHM:
+
+1.  Capture BGR frame from the camera feed.
+2.  Convert BGR to RGB; pass to MediaPipe FaceLandmarker (VIDEO mode).
+3.  If no face detected: reset EMA; return STATE_FACE_LOST.
+4.  Extract head rotation matrix R (3×3) from the facial transformation
+    matrix.
+5.  Extract 6D rotation: r₆ = [R[:,0]; R[:,1]]  (first two columns).
+6.  Extract iris centroid positions for both eyes; compute normalised
+    gaze vectors relative to the respective eye-corner span.
+7.  Extract the 10 configured eye-direction blendshape activations.
+8.  Concatenate: v = [r₆ | iris | blendshapes] ∈ ℝ²⁰.
+9.  Apply calibration offset: v_corr = v − offset.
+10. Apply EMA: v̂_t = α·v_corr + (1−α)·v̂_{t−1}.
+11. Run GazeMLP ONNX graph: logits = W₃·GELU(W₂·GELU(W₁·v̂+b₁)+b₂)+b₃.
+12. Compute softmax probabilities; zone = argmax(probabilities).
+13. Evaluate off-road hysteresis counter; set DISTRACTION_ALERT if
+    counter ≥ 45 frames.
+14. Compute eye_avg = (eyeBlinkLeft + eyeBlinkRight) / 2.
+15. Evaluate microsleep hysteresis (eye_avg > 0.5 for ≥ 12 frames).
+16. Evaluate yawn hysteresis (jawOpen > 0.5 for ≥ 45 frames).
+17. Update 60-second PERCLOS window; set PERCLOS_ALERT if > 0.20.
+18. If any alert is active: trigger piezo buzzer and HUD warning.
+
+
+TIME COMPLEXITY:
+
+1. Time Complexity of MediaPipe FaceLandmarker Landmark Inference:
+   O(W · H + L)                                                (1)
+   where W, H = input frame dimensions; L = 478 landmarks.
+
+2. Time Complexity of 20-Dimensional Geometric Feature Vector Construction:
+   O(L)                                                        (2)
+   Linear in landmark count; constant for fixed L = 478.
+
+3. Time Complexity of Exponential Moving Average (EMA) Feature Smoothing:
+   O(D)                                                        (3)
+   where D = 20 (feature dimension).
+
+4. Time Complexity of the GazeMLP Two-Hidden-Layer Forward Pass:
+   O(D·H₁ + H₁·H₂ + H₂·C)                                   (4)
+   where D = 20, H₁ = H₂ = 64 (hidden units), C = 9 (classes).
+   With these values: 20·64 + 64·64 + 64·9 = 1280 + 4096 + 576 = 5952
+   multiply-accumulate operations — sub-millisecond on any platform.
+
+5. Time Complexity of Temporal Hysteresis Counter Evaluation:
+   O(1) per counter (three independent counters).              (5)
+
+6. Amortised Time Complexity of the Trailing PERCLOS Window Update:
+   O(1) amortised (circular buffer append + sum).              (6)
+
+The dominant cost is MediaPipe FaceLandmarker (term 1), which accounts
+for over 95% of per-frame wall-clock time on the Raspberry Pi 5.
+
+
+MATHEMATICAL REPRESENTATION:
+
+1. 6D Rotation Representation (Zhou et al., 2019)
+
+   r₆ = [R[:,0] ⊕ R[:,1]] ∈ ℝ⁶                              (7)
+
+   where R ∈ ℝ³ˣ³ is the upper-left rotation sub-matrix of the 4×4
+   MediaPipe facial transformation matrix, and ⊕ denotes vector
+   concatenation. The first two columns span the rotation without gimbal
+   lock, providing a continuous, differentiable rotation embedding
+   suitable for gradient-based learning.
+
+2. Normalised Iris Gaze Vector (per eye)
+
+        iris_p − eye_center
+   gₓ = ──────────────────── · 2,    gy = analogous for y            (8)
+              eye_width
+
+   where iris_p is the (x, y) position of the iris centre landmark,
+   eye_center = 0.5 · (p_inner + p_outer) is the midpoint of the eye-
+   corner anchors, and eye_width = ||p_outer − p_inner|| normalises for
+   head distance. Values near 0 indicate central gaze; ±1 indicate
+   extreme lateral gaze.
+
+3. Feature Vector
+
+   v = [r₆ | gₓ_L, g_y_L, gₓ_R, g_y_R | b₁,...,b₁₀] ∈ ℝ²⁰          (9)
+
+   Blendshape activations b₁..b₁₀ correspond to:
+   eyeLookInLeft, eyeLookOutLeft, eyeLookUpLeft, eyeLookDownLeft,
+   eyeLookInRight, eyeLookOutRight, eyeLookUpRight, eyeLookDownRight,
+   eyeBlinkLeft, eyeBlinkRight.
+
+4. Per-User Calibration Offset
+
+   offset = μ_user,front − μ_dataset,front                           (10)
+   v_corr = v − offset
+
+   where μ_user,front is the mean of feature vectors sampled during the
+   5-second neutral-pose calibration window, and μ_dataset,front is the
+   class-mean feature vector for the "front" gaze zone computed from the
+   full training set. Subtracting the offset translates the user's
+   personal neutral-pose signature onto the population reference,
+   reducing cross-subject systematic bias (Fridman et al., 2018).
+
+5. Exponential Moving Average Smoothing
+
+   v̂_t = α · v_corr,t + (1 − α) · v̂_{t−1},    α = 0.3             (11)
+
+   EMA suppresses single-frame landmark jitter while tracking genuine
+   head movement with less phase lag than a fixed-length rolling window.
+
+6. GazeMLP Forward Pass
+
+   h₁ = GELU(W₁ · v̂ + b₁),    h₁ ∈ ℝ⁶⁴
+   h₁ ← Dropout(h₁, p = 0.2)
+   h₂ = GELU(W₂ · h₁ + b₂),   h₂ ∈ ℝ⁶⁴
+   h₂ ← Dropout(h₂, p = 0.2)
+   logits = W₃ · h₂ + b₃,      logits ∈ ℝ⁹                         (12)
+
+   p_k = exp(logits_k) / Σⱼ exp(logits_j)    (softmax)
+   zone = arg max_k p_k
+
+7. Temporal Hysteresis Counter
+
+   c_t  = c_{t−1} + 1  if condition_t = True, else 0
+   alert_t = 1  if c_t ≥ T,  else 0                                  (13)
+
+   For the distraction path: condition_t = ¬is_on_road(zone_t),
+   T = 45 frames (1.5 s at 30 fps).
+   For microsleep: condition_t = (eye_avg_t > 0.5), T = 12 frames.
+   For yawn: condition_t = (jawOpen_t > 0.5), T = 45 frames.
+
+8. PERCLOS
+
+   PERCLOS = (1/N) · Σᵢ₌₁ᴺ 𝟙[eye_avg_i > θ_eye]                    (14)
+
+   where N = |60-second trailing window|, θ_eye = 0.5, and
+   𝟙[·] is the indicator function. A PERCLOS value exceeding 0.20
+   constitutes a drowsiness alert.
+
+9. Blink Rate
+
+   blink_rate = blink_count / (session_duration / 60)                (15)
+
+   where blink_count increments on each rising edge of the blink
+   hysteresis counter that does not escalate to a microsleep event.
+   A rate substantially above 25 blinks/min is consistent with fatigue
+   literature.
+
+
+PSEUDOCODE:
+
+FUNCTION extractFeatures(matrix4x4, landmarks, blendshapeList):
+    R = matrix4x4[0:3, 0:3]
+    r6d = CONCAT(R[:,0], R[:,1])                      // 6-D rotation
+    iris = computeIrisGaze(landmarks)                 // 4-D iris
+    bsh  = selectBlendshapes(blendshapeList, BSH_NAMES) // 10-D
+    RETURN CONCAT(r6d, iris, bsh)                     // v ∈ R^20
+
+FUNCTION processFrame(frame, session, calibration, ema_state):
+    mp_result = mediaPipe.detectForVideo(RGB(frame), timestamp_ms)
+
+    IF mp_result.face_landmarks IS EMPTY:
+        ema_state.reset()
+        RETURN STATE_FACE_LOST
+
+    // Path A — Gaze classification
+    v        = extractFeatures(mp_result.matrix, mp_result.landmarks,
+                               mp_result.blendshapes)
+    v_corr   = v - calibration.offset
+    v_smooth = ema_state.update(v_corr)               // EMA α=0.3
+
+    logits = gazeMLPOnnxSession.run(v_smooth)
+    probs  = softmax(logits)
+    zone   = GAZE_ZONES[argmax(probs)]
+
+    off_road     = NOT is_on_road(zone)
+    distr_alert  = offRoadCounter.update(off_road)    // T=45 frames
+
+    // Path B — Drowsiness rules
+    eye_avg     = (bsh["eyeBlinkLeft"] + bsh["eyeBlinkRight"]) / 2
+    jaw_open    = bsh["jawOpen"]
+
+    micro_alert = microsleepCounter.update(eye_avg > 0.5) // T=12 frames
+    yawn_alert  = yawnCounter.update(jaw_open > 0.5)      // T=45 frames
+
+    perclos_window.append(1 IF eye_avg > 0.5 ELSE 0)
+    perclos      = SUM(perclos_window) / LEN(perclos_window)
+    perc_alert   = perclos > 0.20 AND LEN(perclos_window) > FPS
+
+    // Signal fusion
+    alert = distr_alert OR micro_alert OR yawn_alert OR perc_alert
+
+    IF alert:
+        triggerBuzzer()
+        updateHUD(zone, probs, perclos, session_metrics)
+
+    RETURN zone, probs, perclos, alert
+
+
+────────────────────────────────────────────────────────────────────────
+SECTION 3.4  OPERATIONAL FRAMEWORK
+────────────────────────────────────────────────────────────────────────
+
+Figure 4. Operational Framework of the GAZE System Depicting the Input, Process, and Output Phases of the Real-Time Driver Attention Monitoring Workflow
+
+----------- MERMAID: Operational Framework -----------
+flowchart LR
+    subgraph INPUT["INPUT"]
+        I1[RGB Camera Feed\n1280×720 @ 30 fps]
+        I2[DMD Dataset\nGazeMLP Training]
+        I3[5-s Calibration\nNeutral-Pose Window]
+    end
+
+    subgraph PROCESS["PROCESS"]
+        P1[MediaPipe\nFaceLandmarker\nSingle pass / frame]
+        P2A["Path A\nFeature Vector (ℝ²⁰)\n+ Calibration Offset\n+ EMA (α=0.3)\n+ GazeMLP ONNX\n→ 9-class zone"]
+        P2B["Path B\nBlendshape Rules\nMicrosleep · Yawn\nPERCLOS"]
+        P3[Signal Fusion\n& Hysteresis\nAlert Decision]
+    end
+
+    subgraph OUTPUT["OUTPUT"]
+        O1[Attentive\nContinue Loop]
+        O2[Alert\nBuzzer + HUD]
+        O3[Session Metrics\nLatency · Events\nPERCLOS · Blink/min]
+    end
+
+    I1 --> P1
+    I2 -.->|trained weights baked into ONNX| P2A
+    I3 -.->|calibration offset| P2A
+    P1 --> P2A
+    P1 --> P2B
+    P2A --> P3
+    P2B --> P3
+    P3 -->|No alert| O1
+    P3 -->|Alert| O2
+    P3 --> O3
+------------------------------------------------------
+
+The researchers implemented a comprehensive operational framework
+organised into three interconnected phases: Input, Process, and Output.
+The diagram systematically transforms raw camera frames into actionable
+safety interventions.
+
+The Input phase establishes the foundation for real-time perception and
+personalisation. A continuous live video feed at 1280×720 pixels is
+captured from a compatible RGB (or IR-capable) camera. The system's
+intelligence is derived from the GazeMLP model trained on 65,345
+labelled frames from the Driver Monitoring Dataset; the trained weights
+and feature normalisation statistics are compiled into a single
+ONNX file deployed to the device. At session start, a 5-second neutral-
+pose calibration window samples the driver's frontal-gaze feature
+distribution to compute a personalised correction offset.
+
+The Process phase executes a single MediaPipe FaceLandmarker inference
+per frame, then branches into the two parallel paths described in
+Section 3.3. Path A constructs the geometric feature vector, applies
+the calibration offset and EMA smoothing, and classifies the result
+through GazeMLP. Path B evaluates blendshape activations against
+threshold rules. The signal fusion step consolidates all active
+conditions through independent hysteresis counters before issuing a
+binary alert decision.
+
+The Output phase delivers tangible real-time interventions. Attentive
+states continue the monitoring loop. Alert states trigger the 5V piezo
+buzzer and update the on-screen HUD with the active warning. Throughout
+the loop, a session metrics record accumulates per-frame latency
+figures, event counts (off-road, microsleep, yawn, blink), cumulative
+off-road time, and PERCLOS for offline analysis, without cloud
+connectivity.
+
+
+────────────────────────────────────────────────────────────────────────
+SECTION 3.5  USE CASE / FLOWCHART / STATE DIAGRAM
+────────────────────────────────────────────────────────────────────────
+
+The GAZE application is designed to enhance driver attention
+monitoring for PUV operators. It leverages MediaPipe facial landmark
+extraction (geometric features and blendshapes) and a lightweight
+GazeMLP neural network classifier to provide real-time, offline driver
+attention information on an edge device.
+
+3.5.1 Use Case
+
+Figure 5. Use Case Diagram of the GAZE Driver Attention Monitoring System Showing Actor Interactions and System Functions
+
+----------- MERMAID: Use Case Diagram -----------
+flowchart TD
+    Actor([Driver / PUV Operator])
+
+    Actor -->|Powers on device| UC1[UC1: Hardware Initialisation\nCamera open, ONNX model loaded]
+    UC1 --> UC2[UC2: Neutral-Pose Calibration\n5-second countdown and capture]
+    UC2 --> UC3[UC3: Continuous Monitoring Loop\nMediaPipe → features → GazeMLP]
+
+    UC3 --> UC4A[UC4A: Gaze Zone Classification\n9-class MLP prediction]
+    UC3 --> UC4B[UC4B: Drowsiness Signal Evaluation\nMicrosleep · Yawn · PERCLOS]
+
+    UC4A -->|Off-road > 1.5 s| UC5[UC5: Distraction Alert\nBuzzer + HUD warning]
+    UC4B -->|Threshold breached| UC5
+
+    UC3 -->|'c' key / CALIBRATE button| UC6[UC6: Recalibration\nNew neutral-pose capture]
+    UC3 -->|'r' key / RESET button| UC7[UC7: Session Reset\nClear counters and EMA]
+    UC3 -->|'q' key| UC8[UC8: Graceful Shutdown]
+
+    UC3 --> UC9[UC9: Session Metrics Logging\nLatency · Events · PERCLOS · Blink/min]
+-------------------------------------------------
+
+GAZE serves one primary actor: the Driver (PUV operator). The
+process begins with hardware initialisation — the camera stream is
+opened and the GazeMLP ONNX model is loaded into the ONNX Runtime
+session. The driver then completes a 5-second neutral-pose calibration
+(UC2) during which a countdown is displayed on the HUD. Following
+calibration, the system enters the continuous monitoring loop (UC3).
+
+Each iteration of the loop invokes MediaPipe FaceLandmarker to extract
+landmarks and blendshapes (single pass), constructs the 20-D feature
+vector, applies the calibration and EMA, classifies gaze zone via
+GazeMLP (UC4A), and simultaneously evaluates blendshape drowsiness
+rules (UC4B). If the distraction or drowsiness threshold is breached
+(UC5), the buzzer triggers and the HUD shows the alert. The driver may
+re-initiate calibration at any time via the on-screen CALIBRATE button
+or the 'c' key (UC6), or reset all session counters via the RESET
+button or 'r' key (UC7). The session terminates on 'q' (UC8) with a
+final metrics summary.
+
+
+3.5.2 Flowchart
+
+Figure 6. Flowchart of the GAZE System's Per-Frame Hybrid Perception and Alert Decision Loop
+
+----------- MERMAID: Main Flowchart -----------
+flowchart TD
+    START([Start]) --> INIT[Initialise\nCamera · Model · Counters]
+    INIT --> CALIB[5-s Calibration\nCompute offset]
+    CALIB --> CAP[Capture Frame]
+
+    CAP --> FACE{Face\nDetected?}
+    FACE -- No --> CAP
+
+    FACE -- Yes --> FEAT[Extract Features\n20-D: rotation + iris + blendshapes]
+    FEAT --> PROC[Calibrate + EMA Smooth\nGazeMLP → zone · Blendshape rules]
+
+    PROC --> ALERT{Any alert\nthreshold breached?}
+    ALERT -- Yes --> BUZ[Trigger Buzzer\nUpdate HUD]
+    ALERT -- No --> HUD[Update HUD]
+
+    BUZ --> KEY
+    HUD --> KEY
+
+    KEY{Key / Button?} -- q --> END([End])
+    KEY -- c / CALIBRATE --> CALIB
+    KEY -- r / RESET --> RST[Reset Counters\n& EMA] --> CAP
+    KEY -- none --> CAP
+-----------------------------------------------
+
+
+3.5.3 State Diagram
+
+Figure 7. State Diagram of the GAZE System Illustrating Runtime State Transitions from Initialization Through Monitoring to Alerting
+
+----------- MERMAID: State Diagram -----------
+stateDiagram-v2
+    [*] --> Initialising : Power on
+    Initialising --> Calibrating : Camera open · Model loaded
+    Calibrating --> Monitoring : Offset computed
+
+    Monitoring --> Alerting : Any hysteresis threshold breached\n(distraction · microsleep · yawn · PERCLOS)
+    Alerting --> Monitoring : Condition no longer sustained\n(counter resets)
+
+    Monitoring --> Calibrating : CALIBRATE / 'c'
+    Monitoring --> Monitoring  : RESET / 'r' (counters cleared)
+    Monitoring --> [*]         : 'q' → Shutdown
+----------------------------------------------
+
+The state diagram captures the runtime behaviour of GAZE. The
+system begins in Initialising, where the camera stream is opened and
+the ONNX model is loaded into memory. A successful face detection
+transitions the system to Calibrating, where the 5-second neutral-pose
+window is recorded and the personalised calibration offset is computed.
+If calibration captures fewer than 30 valid frames, the offset defaults
+to zero (identity calibration).
+
+The system then enters the central Monitoring superstate, which
+encapsulates two internal states: FaceDetected (the normal operational
+mode) and FaceLost (triggered when MediaPipe returns no landmarks for
+a frame, causing an EMA reset to prevent stale smoothed values from
+propagating). Within Monitoring, each frame independently updates all
+four alert paths. Alert states are entered when the respective
+hysteresis threshold is crossed and exited as soon as the underlying
+condition is no longer sustained. These transitions are independent,
+meaning multiple alerts can be active simultaneously. The CALIBRATE and
+RESET controls are available from any Monitoring state, allowing the
+operator to re-personalise the system or clear accumulated session
+metrics mid-session without restarting the application.
+
+
+────────────────────────────────────────────────────────────────────────
+END OF CORRECTED CHAPTER III CONTENT
+────────────────────────────────────────────────────────────────────────
