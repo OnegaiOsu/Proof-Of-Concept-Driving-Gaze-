@@ -280,11 +280,6 @@ def run(
     cap = cv2.VideoCapture(camera, cv2.CAP_DSHOW)
     if not cap.isOpened():
         raise RuntimeError(f"could not open camera {camera}")
-    # On Windows DirectShow most UVC webcams default to YUY2 at 1280x720,
-    # which the driver caps at ~10 FPS. Forcing MJPG (compressed) unlocks
-    # the native 30 FPS path. Set fourcc *before* size/fps for the format
-    # negotiation to pick it up.
-    cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
     cap.set(cv2.CAP_PROP_FPS, fps)
@@ -292,7 +287,7 @@ def run(
     actual_w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     actual_h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     print(f"camera: {actual_w}x{actual_h} @ {actual_fps:.1f} fps "
-          f"(requested {fps} fps, MJPG)")
+          f"(requested {fps} fps)")
 
     t_start = time.monotonic()
     fps_window: deque[float] = deque(maxlen=30)
