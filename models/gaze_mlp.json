@@ -10,9 +10,27 @@
     "infotainment",
     "steering_wheel"
   ],
-  "feature_dim": 20,
-  "per_frame_dim": 20,
+  "feature_dim": 48,
+  "per_frame_dim": 24,
   "temporal_window": 1,
-  "input": "features  (B, 20)  float32",
+  "use_deltas": true,
+  "blendshape_names": [
+    "eyeLookInLeft",
+    "eyeLookOutLeft",
+    "eyeLookUpLeft",
+    "eyeLookDownLeft",
+    "eyeLookInRight",
+    "eyeLookOutRight",
+    "eyeLookUpRight",
+    "eyeLookDownRight",
+    "eyeBlinkLeft",
+    "eyeBlinkRight",
+    "eyeSquintLeft",
+    "eyeSquintRight",
+    "browDownLeft",
+    "browDownRight"
+  ],
+  "version": "v2",
+  "input": "features  (B, 48)  float32",
   "output": "logits    (B, 9)   float32  (argmax -> labels[i])"
 }

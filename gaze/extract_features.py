@@ -36,10 +36,12 @@ from .config import (
     DMD_ROOT,
     FEATURES,
     FEATURES_NPZ,
+    FeatureConfig,
     GAZE_ZONES,
     MANIFEST_CSV,
+    ON_ROAD_ZONES,
 )
-from .features import FEATURE_DIM, FaceFeatureExtractor
+from .features import FaceFeatureExtractor
 
 LABEL_TO_IDX = {label: i for i, label in enumerate(GAZE_ZONES)}
 
@@ -68,6 +70,7 @@ def _process_session(
 
     Returns (features, labels_idx, valid_frame_indices).
     """
+    feature_dim = extractor.feature_dim
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
         raise RuntimeError(f"cannot open {video_path}")
@@ -79,7 +82,7 @@ def _process_session(
     if not target_frames:
         cap.release()
         return (
-            np.empty((0, FEATURE_DIM), dtype=np.float32),
+            np.empty((0, feature_dim), dtype=np.float32),
             np.empty((0,), dtype=np.int64),
             [],
         )
@@ -107,7 +110,7 @@ def _process_session(
     cap.release()
     if not feats:
         return (
-            np.empty((0, FEATURE_DIM), dtype=np.float32),
+            np.empty((0, feature_dim), dtype=np.float32),
             np.empty((0,), dtype=np.int64),
             [],
         )
@@ -123,11 +126,17 @@ def extract_all(
     out_npz: Path = FEATURES_NPZ,
     stride: int | None = None,
     limit_sessions: int | None = None,
+    cfg: FeatureConfig = FEATURES,
 ) -> Path:
     if stride is None:
-        stride = FEATURES.frame_stride
+        stride = cfg.frame_stride
     df = pd.read_csv(manifest_csv)
-    sessions = df.groupby("session_key", sort=True)
+    has_modality = "modality" in df.columns
+    # Group by (session_key, modality) so an IR pass and its RGB twin
+    # are processed as two independent "sessions" with monotonic
+    # timestamps and distinct session keys downstream.
+    group_cols = ["session_key", "modality"] if has_modality else ["session_key"]
+    sessions = df.groupby(group_cols, sort=True)
     session_keys = list(sessions.groups.keys())
     if limit_sessions is not None:
         session_keys = session_keys[:limit_sessions]
@@ -142,8 +151,13 @@ def extract_all(
     # MediaPipe's VIDEO running mode requires globally-monotonic timestamps
     # within a single FaceLandmarker instance. Recreate it per session so
     # each video starts from t=0 cleanly.
-    for sk in tqdm(session_keys, desc="sessions"):
-        session_df = sessions.get_group(sk)
+    for key in tqdm(session_keys, desc="sessions"):
+        session_df = sessions.get_group(key)
+        if has_modality:
+            sk_base, modality = key
+            sk = f"{sk_base}__{modality}"
+        else:
+            sk = key
         video_rel = session_df["video_path"].iloc[0]
         group = session_df["group"].iloc[0]
         subject = str(session_df["subject"].iloc[0])
@@ -159,7 +173,7 @@ def extract_all(
             continue
 
         try:
-            with FaceFeatureExtractor() as extractor:
+            with FaceFeatureExtractor(cfg) as extractor:
                 feats, labels, kept = _process_session(
                     extractor, video_path, frames_to_label, stride
                 )
@@ -189,9 +203,7 @@ def extract_all(
         [arr.astype(f"<U{max_sk}") for arr in all_sessions], axis=0
     )
     on_road = np.array(
-        [int(GAZE_ZONES[i] in {"front", "center_mirror",
-                                "left_mirror", "right_mirror"})
-         for i in labels],
+        [int(GAZE_ZONES[i] in ON_ROAD_ZONES) for i in labels],
         dtype=np.int8,
     )
 
@@ -223,9 +235,27 @@ if __name__ == "__main__":
     import argparse
 
     ap = argparse.ArgumentParser()
+    ap.add_argument("--manifest", type=Path, default=MANIFEST_CSV,
+                    help="input manifest CSV (default: v1)")
+    ap.add_argument("--out", type=Path, default=FEATURES_NPZ,
+                    help="output .npz path (default: v1)")
     ap.add_argument("--stride", type=int, default=None,
                     help="frame stride (default from config)")
     ap.add_argument("--limit-sessions", type=int, default=None,
                     help="process only the first N sessions (debug)")
+    ap.add_argument("--feature-set", choices=["v1", "v2"], default="v1",
+                    help="which FeatureConfig to use")
     args = ap.parse_args()
-    extract_all(stride=args.stride, limit_sessions=args.limit_sessions)
+
+    if args.feature_set == "v2":
+        from .config import FEATURES_V2
+        feat_cfg = FEATURES_V2
+    else:
+        feat_cfg = FEATURES
+    extract_all(
+        manifest_csv=args.manifest,
+        out_npz=args.out,
+        stride=args.stride,
+        limit_sessions=args.limit_sessions,
+        cfg=feat_cfg,
+    )

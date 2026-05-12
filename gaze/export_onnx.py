@@ -68,6 +68,9 @@ def main() -> None:
         "feature_dim": in_dim,
         "per_frame_dim": int(ckpt.get("per_frame_dim", FEATURE_DIM)),
         "temporal_window": int(ckpt.get("temporal_window", 1)),
+        "use_deltas": bool(ckpt.get("use_deltas", False)),
+        "blendshape_names": list(ckpt.get("blendshape_names", [])),
+        "version": str(ckpt.get("version", "v1")),
         "input": f"features  (B, {in_dim})  float32",
         "output": "logits    (B, 9)   float32  (argmax -> labels[i])",
     }

@@ -103,6 +103,30 @@ def build_temporal_features(arr: GazeArrays, window: int) -> np.ndarray:
     return out
 
 
+def build_delta_features(arr: GazeArrays) -> np.ndarray:
+    """Return ``(N, 2 * D)`` array: [v_t | v_t - v_{t-1}].
+
+    The delta channel encodes per-frame motion (gaze velocity) and is
+    clamped to zero at session boundaries so cross-session leakage is
+    impossible.
+    """
+    feats = arr.features
+    sessions = arr.sessions
+    n, d = feats.shape
+    if n == 0:
+        return feats.copy()
+
+    # First-row index of each contiguous session run.
+    change = np.empty(n, dtype=bool)
+    change[0] = True
+    change[1:] = sessions[1:] != sessions[:-1]
+    prev_idx = np.arange(n, dtype=np.int64) - 1
+    prev_idx[change] = np.flatnonzero(change)  # clamp at session start
+    deltas = (feats - feats[prev_idx]).astype(np.float32)
+
+    return np.concatenate([feats, deltas], axis=1)
+
+
 class GazeDataset(Dataset):
     def __init__(
         self,

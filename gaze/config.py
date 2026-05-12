@@ -24,6 +24,14 @@ MODELS_DIR.mkdir(exist_ok=True)
 MANIFEST_CSV = CACHE_DIR / "dmd_gaze_manifest.csv"
 FEATURES_NPZ = CACHE_DIR / "dmd_gaze_features.npz"
 
+# --- v2 artefacts (safe retrain — do NOT overwrite v1) ------------------
+# v2 adds IR videos, wider blendshapes, optional delta features, and
+# reclassifies front_right as on-road. Kept on separate paths so v1
+# (the currently-deployed model) is preserved untouched.
+MANIFEST_CSV_V2 = CACHE_DIR / "dmd_gaze_manifest_v2.csv"
+FEATURES_NPZ_V2 = CACHE_DIR / "dmd_gaze_features_v2.npz"
+V2_RUN_DIR = RUNS_DIR / "gaze_mlp_v2"
+
 # --- Label space --------------------------------------------------------
 # DMD gaze-zone labels (mutually exclusive within a frame).
 GAZE_ZONES: tuple[str, ...] = (
@@ -43,9 +51,13 @@ INVALID_LABELS: frozenset[str] = frozenset({"not_valid"})
 
 # Coarse binary mapping used by the temporal "eyes-off-road" detector
 # (Thesis Objective 2). Mirrors are considered on-road glances per the
-# SPIDER scanning model (Strayer & McDonnell, 2025).
+# SPIDER scanning model (Strayer & McDonnell, 2025). front_right is
+# included because the right windshield region is part of the forward
+# scanning arc (right A-pillar / forward-right traffic) rather than a
+# distraction zone — this reclassification was validated in v2 ablation.
 ON_ROAD_ZONES: frozenset[str] = frozenset({
     "front", "center_mirror", "left_mirror", "right_mirror",
+    "front_right",
 })
 
 
@@ -80,6 +92,28 @@ class FeatureConfig:
         "eyeLookUpRight", "eyeLookDownRight",
         "eyeBlinkLeft", "eyeBlinkRight",
     )
+
+    @property
+    def feature_dim(self) -> int:
+        # 6 rotation-6D + 4 iris + N blendshapes
+        return 6 + 4 + len(self.blendshape_names)
+
+
+# v2 widens the blendshape window with brow + squint signals. Mirror
+# checks tend to engage brow and eyelid muscles in addition to gaze
+# direction; including these gives the MLP more separating power
+# between front_right vs center_mirror (the dominant v1 confusion).
+FEATURES_V2 = FeatureConfig(
+    blendshape_names=(
+        "eyeLookInLeft", "eyeLookOutLeft",
+        "eyeLookUpLeft", "eyeLookDownLeft",
+        "eyeLookInRight", "eyeLookOutRight",
+        "eyeLookUpRight", "eyeLookDownRight",
+        "eyeBlinkLeft", "eyeBlinkRight",
+        "eyeSquintLeft", "eyeSquintRight",
+        "browDownLeft", "browDownRight",
+    ),
+)
 
 
 # --- Training -----------------------------------------------------------

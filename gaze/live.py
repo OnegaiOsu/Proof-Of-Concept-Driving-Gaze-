@@ -48,6 +48,9 @@ from .calibration import (
     load_dataset_front_mean,
 )
 from .config import (
+    FEATURES,
+    FEATURES_V2,
+    FeatureConfig,
     GAZE_ZONES,
     INFER,
     MODELS_DIR,
@@ -102,6 +105,33 @@ def _load_session(onnx_path: Path):
     return ort.InferenceSession(
         str(onnx_path), sess_options=so, providers=["CPUExecutionProvider"]
     )
+
+
+def _load_model_meta(onnx_path: Path) -> dict:
+    """Read the sidecar JSON next to an ONNX file (written by export_onnx)."""
+    import json as _json
+
+    meta_path = onnx_path.with_suffix(".json")
+    if not meta_path.is_file():
+        return {}
+    try:
+        return _json.loads(meta_path.read_text())
+    except Exception:
+        return {}
+
+
+def _feature_config_for(meta: dict) -> FeatureConfig:
+    """Pick the FeatureConfig that matches a model's blendshape set."""
+    names = tuple(meta.get("blendshape_names") or ())
+    if not names:
+        return FEATURES
+    if names == FEATURES_V2.blendshape_names:
+        return FEATURES_V2
+    if names == FEATURES.blendshape_names:
+        return FEATURES
+    # Custom set: construct a matching config so the extractor outputs
+    # exactly what the model was trained on.
+    return FeatureConfig(blendshape_names=names)
 
 
 def _calibrate(
@@ -171,7 +201,7 @@ def _calibrate(
             key = cv2.waitKey(1) & 0xFF
             if key == ord("s"):
                 print("calibration skipped by user")
-                return identity(FEATURE_DIM)
+                return identity(extractor.feature_dim)
             if key == ord("q"):
                 raise KeyboardInterrupt
 
@@ -182,7 +212,7 @@ def _calibrate(
 
     if len(samples) < 30:
         print(f"calibration: only {len(samples)} valid frames - skipping correction")
-        return identity(FEATURE_DIM)
+        return identity(extractor.feature_dim)
 
     user_front = np.mean(np.stack(samples, axis=0), axis=0).astype(np.float32)
     offset = (user_front - dataset_front).astype(np.float32)
@@ -213,9 +243,18 @@ def run(
 
     sess = _load_session(onnx_path)
     in_name = sess.get_inputs()[0].name
+    meta = _load_model_meta(onnx_path)
+    feat_cfg = _feature_config_for(meta)
+    per_frame_dim = int(meta.get("per_frame_dim", feat_cfg.feature_dim))
+    model_in_dim = int(meta.get("feature_dim", per_frame_dim))
+    use_deltas = bool(meta.get("use_deltas", model_in_dim == 2 * per_frame_dim))
+    print(f"live: model={onnx_path.name}  version={meta.get('version', 'v1')}  "
+          f"per_frame_dim={per_frame_dim}  in_dim={model_in_dim}  "
+          f"deltas={'ON' if use_deltas else 'OFF'}")
 
-    extractor = FaceFeatureExtractor()
-    ema = EMA(alpha=TRAIN.ema_alpha, dim=FEATURE_DIM)
+    extractor = FaceFeatureExtractor(cfg=feat_cfg)
+    ema = EMA(alpha=TRAIN.ema_alpha, dim=per_frame_dim)
+    prev_vec: np.ndarray | None = None  # for delta features
 
     off_road_hyst = HysteresisCounter(INFER.off_road_frames)
     microsleep_hyst = HysteresisCounter(max(1, int(round(drowsy.microsleep_seconds * fps))))
@@ -259,7 +298,7 @@ def run(
             cal.save(CALIBRATION_PATH)
             print(f"saved calibration to {CALIBRATION_PATH}")
     else:
-        cal = identity(FEATURE_DIM)
+        cal = identity(per_frame_dim)
 
     # --- buttons + mouse input -----------------------------------------
     btn_calibrate = Button("CALIBRATE", (1280 - 16 - 140, 12, 140, 36),
@@ -288,7 +327,9 @@ def run(
     print("buttons: CALIBRATE / RESET   keys: q=quit r=reset c=recalibrate")
 
     def _do_reset() -> None:
+        nonlocal prev_vec
         ema.reset()
+        prev_vec = None
         off_road_hyst.reset()
         microsleep_hyst.reset()
         yawn_hyst.reset()
@@ -333,8 +374,14 @@ def run(
 
             if ff.valid:
                 vec = ema(cal.apply(ff.vec))
+                if use_deltas:
+                    delta = vec - prev_vec if prev_vec is not None else np.zeros_like(vec)
+                    prev_vec = vec
+                    model_in = np.concatenate([vec, delta]).astype(np.float32)
+                else:
+                    model_in = vec.astype(np.float32)
                 t_nn0 = time.monotonic()
-                logits = sess.run(None, {in_name: vec[None, :].astype(np.float32)})[0]
+                logits = sess.run(None, {in_name: model_in[None, :]})[0]
                 nn_lat_ms.append((time.monotonic() - t_nn0) * 1000.0)
                 probs = softmax(logits[0])
                 cls_idx = int(np.argmax(probs))
@@ -348,6 +395,7 @@ def run(
                 yawning = jaw_open > drowsy.yawn_thr
             else:
                 ema.reset()
+                prev_vec = None
 
             perclos_window.append(1 if eye_closed else 0)
             perclos = sum(perclos_window) / max(1, len(perclos_window))

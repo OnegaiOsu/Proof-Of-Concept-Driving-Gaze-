@@ -46,6 +46,9 @@ RIGHT_EYE_TOP = 386
 RIGHT_EYE_BOTTOM = 374
 RIGHT_IRIS_CENTER = 473
 
+# Default (v1) feature dim. v2 callers should use ``cfg.feature_dim``
+# from their FeatureConfig instance; this constant is kept for backward
+# compatibility with code that imports it directly.
 FEATURE_DIM = 6 + 4 + 10  # rotation (6) + iris (4) + blendshapes (10) = 20
 
 
@@ -89,12 +92,24 @@ class FaceFeatureExtractor:
         )
         self._landmarker = mp_vision.FaceLandmarker.create_from_options(opts)
         self._blendshape_names = cfg.blendshape_names
+        self.feature_dim = 6 + 4 + len(cfg.blendshape_names)
 
     # -- main API --------------------------------------------------------
 
     def extract(self, frame_bgr: np.ndarray, timestamp_ms: int) -> FrameFeatures:
-        """Run landmarker on one BGR frame and return the feature vector."""
+        """Run landmarker on one BGR (or grayscale) frame.
+
+        IR videos in DMD are encoded as 3-channel MP4s where each channel
+        carries the same grayscale signal, so the BGR->RGB swap is a no-op
+        and MediaPipe processes them normally. If a true 2-D grayscale
+        frame is passed in, it is broadcast to 3 channels first.
+        """
         import mediapipe as mp
+
+        if frame_bgr.ndim == 2:
+            frame_bgr = np.repeat(frame_bgr[:, :, None], 3, axis=2)
+        elif frame_bgr.ndim == 3 and frame_bgr.shape[2] == 1:
+            frame_bgr = np.repeat(frame_bgr, 3, axis=2)
 
         # MediaPipe expects RGB, not BGR.
         rgb = frame_bgr[:, :, ::-1]
@@ -103,7 +118,7 @@ class FaceFeatureExtractor:
 
         if not result.face_landmarks:
             return FrameFeatures(
-                np.zeros(FEATURE_DIM, dtype=np.float32), False, 0.0,
+                np.zeros(self.feature_dim, dtype=np.float32), False, 0.0,
                 None, None, None,
             )
 

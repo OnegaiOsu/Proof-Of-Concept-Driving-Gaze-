@@ -31,9 +31,17 @@ def _iter_gaze_jsons(root: Path) -> Iterator[Path]:
     yield from sorted(root.glob("g*/*/s6/*_rgb_ann_gaze.json"))
 
 
-def _face_video_for(json_path: Path) -> Path | None:
-    """Return the matching rgb_face.mp4 for a given gaze annotation file."""
-    stem = json_path.name.replace("_rgb_ann_gaze.json", "_rgb_face.mp4")
+def _face_video_for(json_path: Path, modality: str = "rgb") -> Path | None:
+    """Return the matching face video for a given gaze annotation file.
+
+    modality: "rgb" -> *_rgb_face.mp4, "ir" -> *_ir_face.mp4.
+    """
+    if modality == "rgb":
+        stem = json_path.name.replace("_rgb_ann_gaze.json", "_rgb_face.mp4")
+    elif modality == "ir":
+        stem = json_path.name.replace("_rgb_ann_gaze.json", "_ir_face.mp4")
+    else:
+        raise ValueError(f"unknown modality: {modality}")
     candidate = json_path.parent / stem
     return candidate if candidate.is_file() else None
 
@@ -71,27 +79,30 @@ def _session_key(json_path: Path) -> tuple[str, str, str]:
 
 
 def build_manifest(
-    dmd_root: Path = DMD_ROOT, out_csv: Path = MANIFEST_CSV
+    dmd_root: Path = DMD_ROOT,
+    out_csv: Path = MANIFEST_CSV,
+    modalities: tuple[str, ...] = ("rgb",),
 ) -> Path:
-    """Walk DMD, expand gaze intervals, and write the manifest CSV."""
+    """Walk DMD, expand gaze intervals, and write the manifest CSV.
+
+    modalities: subset of ("rgb", "ir"). If both are given, each labelled
+    frame is emitted twice (once per modality) so feature extraction
+    augments the training set with the matched IR view.
+    """
     rows = 0
     skipped_no_video = 0
     per_label: dict[str, int] = {label: 0 for label in GAZE_ZONES}
+    per_modality: dict[str, int] = {m: 0 for m in modalities}
 
     out_csv.parent.mkdir(parents=True, exist_ok=True)
     with out_csv.open("w", newline="", encoding="utf-8") as fh:
         writer = csv.writer(fh)
         writer.writerow([
             "group", "subject", "session_key",
-            "video_path", "frame_idx", "label", "on_road",
+            "video_path", "frame_idx", "label", "on_road", "modality",
         ])
 
         for json_path in _iter_gaze_jsons(dmd_root):
-            video = _face_video_for(json_path)
-            if video is None:
-                skipped_no_video += 1
-                continue
-
             with json_path.open("r", encoding="utf-8") as jf:
                 doc = json.load(jf)
             frame_to_label = _expand_intervals(doc)
@@ -99,22 +110,45 @@ def build_manifest(
                 continue
 
             group, subject, session_key = _session_key(json_path)
-            video_rel = video.relative_to(dmd_root.parent.parent.parent).as_posix()
 
-            for frame_idx, label in sorted(frame_to_label.items()):
-                writer.writerow([
-                    group, subject, session_key,
-                    video_rel, frame_idx, label,
-                    int(label in ON_ROAD_ZONES),
-                ])
-                rows += 1
-                per_label[label] += 1
+            for modality in modalities:
+                video = _face_video_for(json_path, modality)
+                if video is None:
+                    skipped_no_video += 1
+                    continue
+                video_rel = video.relative_to(
+                    dmd_root.parent.parent.parent
+                ).as_posix()
+
+                for frame_idx, label in sorted(frame_to_label.items()):
+                    writer.writerow([
+                        group, subject, session_key,
+                        video_rel, frame_idx, label,
+                        int(label in ON_ROAD_ZONES),
+                        modality,
+                    ])
+                    rows += 1
+                    per_label[label] += 1
+                    per_modality[modality] += 1
 
     print(f"manifest: {out_csv}  rows={rows}  skipped_no_video={skipped_no_video}")
+    for modality, n in per_modality.items():
+        print(f"  modality {modality:<3} {n:>8}")
     for label in GAZE_ZONES:
         print(f"  {label:<16} {per_label[label]:>8}")
     return out_csv
 
 
 if __name__ == "__main__":
-    build_manifest()
+    import argparse
+
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out", type=Path, default=MANIFEST_CSV,
+                    help="output CSV path")
+    ap.add_argument(
+        "--modalities", nargs="+", default=["rgb"],
+        choices=["rgb", "ir"],
+        help='video modalities to include (e.g. --modalities rgb ir)',
+    )
+    args = ap.parse_args()
+    build_manifest(out_csv=args.out, modalities=tuple(args.modalities))

@@ -1,0 +1,37 @@
+{
+  "test_acc": 0.7261002264448164,
+  "test_macro_f1": 0.6974964223082156,
+  "test_binary_acc": 0.8748646253815103,
+  "best_val_macro_f1": 0.6236568299768792,
+  "best_epoch": 5,
+  "n_params": 6345,
+  "in_dim": 24,
+  "use_deltas": false,
+  "dropout": 0.4,
+  "weight_decay": 0.001,
+  "label_smoothing": 0.1,
+  "patience": 5,
+  "on_road_zones": [
+    "center_mirror",
+    "front",
+    "front_right",
+    "left_mirror",
+    "right_mirror"
+  ],
+  "blendshape_names": [
+    "eyeLookInLeft",
+    "eyeLookOutLeft",
+    "eyeLookUpLeft",
+    "eyeLookDownLeft",
+    "eyeLookInRight",
+    "eyeLookOutRight",
+    "eyeLookUpRight",
+    "eyeLookDownRight",
+    "eyeBlinkLeft",
+    "eyeBlinkRight",
+    "eyeSquintLeft",
+    "eyeSquintRight",
+    "browDownLeft",
+    "browDownRight"
+  ]
+}

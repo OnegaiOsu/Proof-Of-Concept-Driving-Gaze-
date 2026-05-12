@@ -13,16 +13,25 @@ from every live feature vector to remove user-specific bias.
 
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 import numpy as np
 
-from .config import GAZE_ZONES, MODELS_DIR, TRAIN
+from .config import FEATURES_NPZ, GAZE_ZONES, MODELS_DIR, TRAIN
 from .dataset import load_arrays, make_subject_splits
 
 
 def main() -> None:
-    arr = load_arrays()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--features", type=Path, default=FEATURES_NPZ,
+                    help="features .npz to summarise")
+    ap.add_argument("--out", type=Path,
+                    default=MODELS_DIR / "gaze_class_means.npz",
+                    help="output class-means .npz")
+    args = ap.parse_args()
+
+    arr = load_arrays(args.features)
     splits = make_subject_splits(arr, TRAIN)
     train_idx = splits["train"]
 
@@ -35,10 +44,9 @@ def main() -> None:
         means[c] = arr.features[sel].mean(axis=0)
         counts[c] = int(sel.size)
 
-    out = MODELS_DIR / "gaze_class_means.npz"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    np.savez(out, means=means, counts=counts, labels=np.array(GAZE_ZONES))
-    print(f"saved {out}")
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    np.savez(args.out, means=means, counts=counts, labels=np.array(GAZE_ZONES))
+    print(f"saved {args.out}  (D={arr.features.shape[1]})")
     for name, n in zip(GAZE_ZONES, counts):
         print(f"  {name:<16} n={n}")
 
