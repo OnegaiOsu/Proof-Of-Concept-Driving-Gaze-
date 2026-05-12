@@ -79,10 +79,10 @@ WINDOW_NAME = "VisDrive - live"
 
 @dataclass(frozen=True)
 class DrowsinessConfig:
-    # MediaPipe eyeBlink activation: ~0.3-0.4 is a partial close, >=0.45
-    # is a confident "eye is closed". A lower threshold catches the short
-    # 100-200 ms blinks that 0.5 was missing in practice.
-    eye_closed_thr: float = 0.4
+    # MediaPipe eyeBlink activation: ~0.5 is the dataset-tuned "eye is
+    # closed" boundary that PERCLOS was originally calibrated against.
+    # Lower thresholds inflate PERCLOS and make the alert latch.
+    eye_closed_thr: float = 0.5
     microsleep_seconds: float = 0.4  # eyes closed continuously => microsleep
     # jawOpen peaks vary by person; 0.35 is conservative enough to avoid
     # false positives during speech but reliably catches a real yawn.
@@ -161,6 +161,9 @@ def _calibrate(
 
     countdown_until = time.monotonic() + 3.0
     capture_until: float | None = None
+
+    if display:
+        cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
 
     while True:
         ok, frame_bgr = cap.read()
@@ -260,6 +263,13 @@ def run(
     extractor = FaceFeatureExtractor(cfg=feat_cfg)
     ema = EMA(alpha=TRAIN.ema_alpha, dim=per_frame_dim)
     prev_vec: np.ndarray | None = None  # for delta features
+    gaze_min_dt = 1.0 / max(1e-3, INFER.gaze_infer_hz)
+    last_gaze_t = -1e9
+    # Last gaze classifier result, held between throttled inferences so
+    # the HUD and hysteresis counters see a stable label every frame.
+    last_zone: str = "<no face>"
+    last_on_road: bool = True
+    last_probs: np.ndarray | None = None
 
     off_road_hyst = TimedHysteresisCounter(INFER.off_road_seconds)
     microsleep_hyst = TimedHysteresisCounter(drowsy.microsleep_seconds)
@@ -334,7 +344,7 @@ def run(
             btn_reset.flash(time.monotonic())
 
     if display:
-        cv2.namedWindow(WINDOW_NAME)
+        cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
         cv2.setMouseCallback(WINDOW_NAME, _mouse)
 
     print(f"live: gaze={onnx_path.name}  off_road={INFER.off_road_seconds:.2f}s  "
@@ -343,9 +353,13 @@ def run(
     print("buttons: CALIBRATE / RESET   keys: q=quit r=reset c=recalibrate")
 
     def _do_reset() -> None:
-        nonlocal prev_vec
+        nonlocal prev_vec, last_gaze_t, last_zone, last_on_road, last_probs
         ema.reset()
         prev_vec = None
+        last_gaze_t = -1e9
+        last_zone = "<no face>"
+        last_on_road = True
+        last_probs = None
         off_road_hyst.reset()
         microsleep_hyst.reset()
         yawn_hyst.reset()
@@ -389,20 +403,32 @@ def run(
             probs: np.ndarray | None = None
 
             if ff.valid:
+                # Always EMA-smooth so the feature stream is stable even
+                # when we don't run the classifier on this tick.
                 vec = ema(cal.apply(ff.vec))
-                if use_deltas:
-                    delta = vec - prev_vec if prev_vec is not None else np.zeros_like(vec)
-                    prev_vec = vec
-                    model_in = np.concatenate([vec, delta]).astype(np.float32)
-                else:
-                    model_in = vec.astype(np.float32)
-                t_nn0 = time.monotonic()
-                logits = sess.run(None, {in_name: model_in[None, :]})[0]
-                nn_lat_ms.append((time.monotonic() - t_nn0) * 1000.0)
-                probs = softmax(logits[0])
-                cls_idx = int(np.argmax(probs))
-                zone = GAZE_ZONES[cls_idx]
-                on_road = is_on_road(zone)
+
+                if (now - last_gaze_t) >= gaze_min_dt:
+                    if use_deltas:
+                        delta = (
+                            vec - prev_vec if prev_vec is not None
+                            else np.zeros_like(vec)
+                        )
+                        prev_vec = vec
+                        model_in = np.concatenate([vec, delta]).astype(np.float32)
+                    else:
+                        model_in = vec.astype(np.float32)
+                    t_nn0 = time.monotonic()
+                    logits = sess.run(None, {in_name: model_in[None, :]})[0]
+                    nn_lat_ms.append((time.monotonic() - t_nn0) * 1000.0)
+                    last_probs = softmax(logits[0])
+                    cls_idx = int(np.argmax(last_probs))
+                    last_zone = GAZE_ZONES[cls_idx]
+                    last_on_road = is_on_road(last_zone)
+                    last_gaze_t = now
+
+                zone = last_zone
+                on_road = last_on_road
+                probs = last_probs
 
                 eye_avg = 0.5 * (_bsh(ff.blendshapes, "eyeBlinkLeft")
                                  + _bsh(ff.blendshapes, "eyeBlinkRight"))
@@ -412,6 +438,13 @@ def run(
             else:
                 ema.reset()
                 prev_vec = None
+                last_gaze_t = -1e9
+                last_zone = "<no face>"
+                last_on_road = True
+                last_probs = None
+                zone = last_zone
+                on_road = last_on_road
+                probs = last_probs
 
             perclos_window.append(1 if eye_closed else 0)
             perclos = sum(perclos_window) / max(1, len(perclos_window))

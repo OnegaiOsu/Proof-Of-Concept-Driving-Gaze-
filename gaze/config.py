@@ -150,6 +150,13 @@ class InferenceConfig:
     # Driver must be classified off-road for >= this many seconds before
     # an alert fires. Thesis specifies 1.5 - 2.0 s.
     off_road_seconds: float = 1.5
+    # The v2 model was trained with frame_stride=3 on ~30 fps DMD video,
+    # so its delta features encode ~100 ms gaps. Running the classifier
+    # at the camera's full FPS would shrink that gap to ~33 ms and make
+    # deltas dominated by head jitter. We throttle the classifier (and
+    # the delta tracker) to this cadence; MediaPipe + blink/yawn signals
+    # still update every frame.
+    gaze_infer_hz: float = 10.0
 
     @property
     def off_road_frames(self) -> int:
