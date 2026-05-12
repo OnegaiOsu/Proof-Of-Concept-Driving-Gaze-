@@ -91,3 +91,36 @@ class HysteresisCounter:
     def reset(self) -> None:
         self._count = 0
         self._tripped = False
+
+
+class TimedHysteresisCounter:
+    """Trip when ``cond`` holds for >= ``seconds_required`` wall-clock seconds.
+
+    Frame-count hysteresis silently stretches to 2-3x real time when the
+    capture/inference loop runs below the configured target FPS. This
+    counter accumulates the per-frame dt so the trip threshold is always
+    in real seconds.
+    """
+
+    def __init__(self, seconds_required: float) -> None:
+        self.seconds_required = float(seconds_required)
+        self._elapsed = 0.0
+        self._tripped = False
+
+    def update(self, cond: bool, dt: float) -> bool:
+        if cond:
+            self._elapsed += max(0.0, float(dt))
+        else:
+            self._elapsed = 0.0
+            self._tripped = False
+        if self._elapsed >= self.seconds_required:
+            self._tripped = True
+        return self._tripped
+
+    @property
+    def elapsed(self) -> float:
+        return self._elapsed
+
+    def reset(self) -> None:
+        self._elapsed = 0.0
+        self._tripped = False

@@ -69,7 +69,7 @@ from .overlay import (
     put,
     softmax,
 )
-from .smoothing import EMA, HysteresisCounter
+from .smoothing import EMA, HysteresisCounter, TimedHysteresisCounter
 
 
 WINDOW_NAME = "VisDrive - live"
@@ -79,13 +79,18 @@ WINDOW_NAME = "VisDrive - live"
 
 @dataclass(frozen=True)
 class DrowsinessConfig:
-    eye_closed_thr: float = 0.5      # blendshape activation
+    # MediaPipe eyeBlink activation: ~0.3-0.4 is a partial close, >=0.45
+    # is a confident "eye is closed". A lower threshold catches the short
+    # 100-200 ms blinks that 0.5 was missing in practice.
+    eye_closed_thr: float = 0.4
     microsleep_seconds: float = 0.4  # eyes closed continuously => microsleep
-    yawn_thr: float = 0.5
-    yawn_seconds: float = 1.5
+    # jawOpen peaks vary by person; 0.35 is conservative enough to avoid
+    # false positives during speech but reliably catches a real yawn.
+    yawn_thr: float = 0.35
+    yawn_seconds: float = 1.2
     perclos_window_seconds: float = 60.0
     perclos_alert: float = 0.20      # >20% closed-eye fraction over 60 s
-    blink_min_seconds: float = 0.10  # short closed -> just a normal blink
+    blink_min_seconds: float = 0.06  # short closed -> just a normal blink
 
 
 # --- helpers ------------------------------------------------------------
@@ -256,17 +261,28 @@ def run(
     ema = EMA(alpha=TRAIN.ema_alpha, dim=per_frame_dim)
     prev_vec: np.ndarray | None = None  # for delta features
 
-    off_road_hyst = HysteresisCounter(INFER.off_road_frames)
-    microsleep_hyst = HysteresisCounter(max(1, int(round(drowsy.microsleep_seconds * fps))))
-    yawn_hyst = HysteresisCounter(max(1, int(round(drowsy.yawn_seconds * fps))))
+    off_road_hyst = TimedHysteresisCounter(INFER.off_road_seconds)
+    microsleep_hyst = TimedHysteresisCounter(drowsy.microsleep_seconds)
+    yawn_hyst = TimedHysteresisCounter(drowsy.yawn_seconds)
 
     perclos_window = deque(maxlen=int(round(drowsy.perclos_window_seconds * fps)))
 
     cap = cv2.VideoCapture(camera, cv2.CAP_DSHOW)
     if not cap.isOpened():
         raise RuntimeError(f"could not open camera {camera}")
+    # On Windows DirectShow most UVC webcams default to YUY2 at 1280x720,
+    # which the driver caps at ~10 FPS. Forcing MJPG (compressed) unlocks
+    # the native 30 FPS path. Set fourcc *before* size/fps for the format
+    # negotiation to pick it up.
+    cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+    cap.set(cv2.CAP_PROP_FPS, fps)
+    actual_fps = cap.get(cv2.CAP_PROP_FPS) or 0.0
+    actual_w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    actual_h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    print(f"camera: {actual_w}x{actual_h} @ {actual_fps:.1f} fps "
+          f"(requested {fps} fps, MJPG)")
 
     t_start = time.monotonic()
     fps_window: deque[float] = deque(maxlen=30)
@@ -280,7 +296,7 @@ def run(
     off_road_events = Counter()
     microsleep_events = Counter()
     yawn_events = Counter()
-    blink_hyst = HysteresisCounter(max(1, int(round(drowsy.blink_min_seconds * fps))))
+    blink_hyst = TimedHysteresisCounter(drowsy.blink_min_seconds)
     blink_events = Counter()
     off_road_seconds_total = 0.0  # cumulative seconds with off-road alert active
 
@@ -321,9 +337,9 @@ def run(
         cv2.namedWindow(WINDOW_NAME)
         cv2.setMouseCallback(WINDOW_NAME, _mouse)
 
-    print(f"live: gaze={onnx_path.name}  off_road_frames={INFER.off_road_frames}  "
-          f"microsleep_frames={microsleep_hyst.frames_required}  "
-          f"yawn_frames={yawn_hyst.frames_required}")
+    print(f"live: gaze={onnx_path.name}  off_road={INFER.off_road_seconds:.2f}s  "
+          f"microsleep={drowsy.microsleep_seconds:.2f}s  "
+          f"yawn={drowsy.yawn_seconds:.2f}s")
     print("buttons: CALIBRATE / RESET   keys: q=quit r=reset c=recalibrate")
 
     def _do_reset() -> None:
@@ -400,11 +416,11 @@ def run(
             perclos_window.append(1 if eye_closed else 0)
             perclos = sum(perclos_window) / max(1, len(perclos_window))
 
-            off_road_alert = off_road_hyst.update(ff.valid and not on_road)
-            microsleep_alert = microsleep_hyst.update(eye_closed)
-            yawn_alert = yawn_hyst.update(yawning)
+            off_road_alert = off_road_hyst.update(ff.valid and not on_road, dt)
+            microsleep_alert = microsleep_hyst.update(eye_closed, dt)
+            yawn_alert = yawn_hyst.update(yawning, dt)
             perclos_alert = perclos > drowsy.perclos_alert and len(perclos_window) > fps
-            blink_flag = blink_hyst.update(eye_closed)
+            blink_flag = blink_hyst.update(eye_closed, dt)
 
             # Edge-triggered counters.
             off_road_events.update(off_road_alert)
